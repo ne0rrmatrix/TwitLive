@@ -44,8 +44,6 @@ public static class FeedService
         }
     }
 
-    #region Get the Podcasts
-
     /// <summary>
     /// Method <c>GetPodcastList</c> return Feed from URL.
     /// </summary>
@@ -79,9 +77,6 @@ public static class FeedService
             return feed;
         }
     }
-    #endregion
-
-    #region Get the Shows
 
     /// <summary>
     /// 
@@ -128,7 +123,6 @@ public static class FeedService
             return Enumerable.Empty<Show>().ToList();
         }
     }
-    #endregion
 
     /// <summary>
     /// Method returns <see cref="DateTime"/> object from string.

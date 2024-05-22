@@ -7,9 +7,6 @@ public partial class BasePageViewModel : ObservableObject
     [ObservableProperty]
     private bool _isRefreshing;
 
-    [ObservableProperty]
-    private string? _title;
-
     /// <summary>
     /// A <see cref="bool"/> instance managed by this class. 
     /// </summary>

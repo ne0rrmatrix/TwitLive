@@ -33,7 +33,6 @@ public partial class ShowPageViewModel : BasePageViewModel
         {
             return;
         }
-        Title = "Shows";
         Shows = new ObservableCollection<Show>(FeedService.GetShowList(_url));
     }
 

@@ -14,7 +14,6 @@ public partial class PodcastPageViewModel : BasePageViewModel
     private ObservableCollection<Podcast> _podcasts;
     public PodcastPageViewModel()
     {
-        Title = "Podcasts";
         var item = PodcastService.GetPodcasts();
         _podcasts = new ObservableCollection<Podcast>(item);
     }
