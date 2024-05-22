@@ -4,16 +4,10 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:TwitLive.Views"
-    Shell.FlyoutBehavior="Disabled"
     Title="TwitLive"
-    FlyoutBackgroundColor="LightGray"
-    FlyoutHeaderBehavior="CollapseOnScroll"
-    FlyoutWidth="220"
+    Shell.NavBarIsVisible="{OnPlatform WinUI=False, Default=True}"
     Shell.BackgroundColor="#34AAD2"
-    Shell.TabBarIsVisible="{OnPlatform Default=true,
-                                       iOS=true,
-                                       WinUI=false,
-                                       MacCatalyst=false}">
+    Shell.TabBarIsVisible="True">
     <Shell.MenuItemTemplate>
         <DataTemplate>
             <Grid
@@ -39,7 +33,7 @@
         </DataTemplate>
     </Shell.MenuItemTemplate>
     
-    <TabBar IsEnabled="{OnPlatform Android=true, iOS=true, Default=false}" IsVisible="{OnPlatform Default=false, iOS=true, Android=true}">
+    <TabBar>
        <Tab Title="Home" Route="Home" Icon="house.png">
             <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" />
         </Tab>
@@ -48,17 +42,5 @@
         </Tab>
     </TabBar>
     
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:PodcastPage}"
-        Route="MainPage" />
-    
-    <MenuItem
-        Clicked="GotoFirstPage"
-        IconImageSource="house.png"
-        Text="Home" />
-    <MenuItem
-        Clicked="GotoVideoPage"
-        IconImageSource="videoplayer.png"
-        Text="VideoPlayer" />
+    <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" Route="MainPage" />
 </Shell>

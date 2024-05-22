@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Web;
+using System.Windows.Input;
 using TwitLive.Models;
 using TwitLive.Services;
 using TwitLive.Views;
@@ -24,9 +25,23 @@ public partial class PodcastPageViewModel : BasePageViewModel
     /// <param name="podcast">A Url <see cref="string"/></param>
     /// <returns></returns>
     [RelayCommand]
-    public async Task GotoShowPage(Podcast podcast)
+    public static async Task GotoShowPage(Podcast podcast)
     {
         var encodedUrl = HttpUtility.UrlEncode(podcast.Url);
-        await Shell.Current.GoToAsync($"{nameof(ShowPage)}?Url={encodedUrl}");
+        var navigationParameter = new Dictionary<string, object>
+        {
+            { "Url", encodedUrl }
+        };
+        await Shell.Current.GoToAsync($"//ShowPage", navigationParameter);
     }
+
+    public ICommand PullToRefreshCommand => new Command(() =>
+    {
+        IsRefreshing = true;
+        IsBusy = true;
+        var item = PodcastService.GetPodcasts();
+        Podcasts = new ObservableCollection<Podcast>(item);
+        IsBusy = false;
+        IsRefreshing = false;
+    });
 }

@@ -6,8 +6,7 @@
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
              x:DataType="viewModel:VideoPlayerViewModel"
              BackgroundColor="#34AAD2"
-             Shell.BackgroundColor="#34AAD2"
-             Title="VideoPlayerPage">
+             Shell.BackgroundColor="#34AAD2">
         <ScrollView>
              <StackLayout>
                 <toolkit:MediaElement 

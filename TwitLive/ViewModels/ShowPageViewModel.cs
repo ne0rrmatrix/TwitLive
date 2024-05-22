@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Web;
+using System.Windows.Input;
 using TwitLive.Models;
 using TwitLive.Services;
 using TwitLive.Views;
@@ -42,7 +43,7 @@ public partial class ShowPageViewModel : BasePageViewModel
     /// <param name="show">A Url <see cref="string"/></param>
     /// <returns></returns>
     [RelayCommand]
-    public async Task GotoVideoPage(Show show)
+    public static async Task GotoVideoPage(Show show)
     {
         var navigationParameter = new Dictionary<string, object>
         {
@@ -50,4 +51,19 @@ public partial class ShowPageViewModel : BasePageViewModel
         };
         await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter);
     }
+
+    public ICommand PullToRefreshCommand => new Command(() =>
+    {
+        IsRefreshing = true;
+        IsBusy = true;
+        if(Url is null)
+        {
+            IsBusy = false;
+            IsRefreshing = false;
+            return;
+        }
+        Shows = new ObservableCollection<Show>(FeedService.GetShowList(Url));
+        IsBusy = false;
+        IsRefreshing = false;
+    });
 }

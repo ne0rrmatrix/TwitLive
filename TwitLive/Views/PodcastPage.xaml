@@ -6,9 +6,13 @@
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
              x:Class="TwitLive.Views.PodcastPage"
              BackgroundColor="#34AAD2"
+             Shell.NavBarIsVisible="False"
              Shell.BackgroundColor="#34AAD2"
-             x:DataType="viewModel:PodcastPageViewModel"
-             Title="{Binding Title}">
+             x:DataType="viewModel:PodcastPageViewModel">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" />
+    </Shell.BackButtonBehavior>
+    <RefreshView Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
     <CollectionView ItemsSource="{Binding Podcasts}"
                     VerticalScrollBarVisibility="Never"
                     HorizontalScrollBarVisibility="Never">
@@ -52,5 +56,21 @@
                      </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
-    </CollectionView>
+     <CollectionView.EmptyView>
+             <ContentView>
+                 <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                     <Label
+                         Padding="20"
+                         FontSize="Large"
+                         HorizontalOptions="Center"
+                         HorizontalTextAlignment="Center"
+                         Text="Loading..."
+                         TextColor="Black"
+                         VerticalOptions="Center" />
+                     <ActivityIndicator IsRunning="True" Color="Red" />
+                 </StackLayout>
+             </ContentView>
+         </CollectionView.EmptyView>
+     </CollectionView>
+    </RefreshView>
 </ContentPage>

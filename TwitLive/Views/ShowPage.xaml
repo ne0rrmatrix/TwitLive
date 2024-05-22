@@ -7,8 +7,9 @@
              x:Class="TwitLive.Views.ShowPage"
              x:DataType="viewModel:ShowPageViewModel"
              BackgroundColor="#34AAD2"
-             Shell.BackgroundColor="#34AAD2"
-             Title="{Binding Title}">
+             Shell.NavBarIsVisible="True"
+             Shell.BackgroundColor="#34AAD2">
+     <RefreshView Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
             <CollectionView HorizontalScrollBarVisibility="Never"
                  VerticalScrollBarVisibility="Never"
                  ItemsSource="{Binding Shows}">
@@ -55,5 +56,21 @@
                               </Frame>
                      </DataTemplate>
                  </CollectionView.ItemTemplate>
-            </CollectionView>
+                <CollectionView.EmptyView>
+             <ContentView>
+                 <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                     <Label
+                         Padding="20"
+                         FontSize="Large"
+                         HorizontalOptions="Center"
+                         HorizontalTextAlignment="Center"
+                         Text="Loading..."
+                         TextColor="Black"
+                         VerticalOptions="Center" />
+                     <ActivityIndicator IsRunning="True" Color="Red" />
+                 </StackLayout>
+             </ContentView>
+         </CollectionView.EmptyView>
+     </CollectionView>
+    </RefreshView>
 </ContentPage>

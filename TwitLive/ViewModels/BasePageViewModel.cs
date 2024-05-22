@@ -5,7 +5,22 @@ namespace TwitLive.ViewModels;
 public partial class BasePageViewModel : ObservableObject
 {
     [ObservableProperty]
+    private bool _isRefreshing;
+
+    [ObservableProperty]
     private string? _title;
+
+    /// <summary>
+    /// A <see cref="bool"/> instance managed by this class. 
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNotBusy))]
+    private bool _isBusy;
+
+    /// <summary>
+    /// A <see cref="bool"/> public property managed by this class.
+    /// </summary>
+    public bool IsNotBusy => !IsBusy;
 
     /// <summary>
     /// The <see cref="DisplayInfo"/> instance managed by this class.

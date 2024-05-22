@@ -24,11 +24,8 @@ public static class MauiProgram
 
         builder.Services.AddTransient<ShowPage>();
         builder.Services.AddTransient<ShowPageViewModel>();
-#if WINDOWS
+
         builder.Services.AddSingleton<VideoPlayerPage>();
-#else
-        builder.Services.AddSingleton<VideoPlayerPage>();
-#endif
         builder.Services.AddSingleton<VideoPlayerViewModel>();
         
         return builder.Build();
