@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:model="clr-namespace:TwitLive.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+             x:Class="TwitLive.Views.ShowPage"
+             x:DataType="viewModel:ShowPageViewModel"
+             BackgroundColor="#34AAD2"
+             Shell.BackgroundColor="#34AAD2"
+             Title="{Binding Title}">
+            <CollectionView HorizontalScrollBarVisibility="Never"
+                 VerticalScrollBarVisibility="Never"
+                 ItemsSource="{Binding Shows}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                        Span="{Binding Orientation}" />
+                </CollectionView.ItemsLayout>
+ 
+                 <CollectionView.ItemTemplate>
+                     <DataTemplate x:DataType="model:Show">
+                          <Frame Background="White" 
+                                WidthRequest="400"
+                                Margin="10,0,10,0" 
+                                Padding="10" 
+                                CornerRadius="10">
+                                  <Grid
+                                        ColumnDefinitions="500"
+                                        RowDefinitions="*, 300">
+                                      <Label 
+                                          Grid.Row="0"
+                                          TextColor="Black"
+                                          HorizontalOptions="Start"
+                                          WidthRequest="350"
+                                          LineBreakMode="WordWrap"
+                                          Text="{Binding Title}"
+                                          FontSize="Title"
+                                          FontAttributes="Bold"
+                                          Margin="10,0,10,0" />
+                                     <Image
+                                         Grid.Row="1" 
+                                         Source="{Binding Image}"
+                                         Aspect="AspectFit"
+                                         HorizontalOptions="Start"
+                                         WidthRequest="350"
+                                         HeightRequest="200"
+                                         Margin="10,0,10,0">
+                                         <Image.GestureRecognizers>
+                                             <TapGestureRecognizer  
+                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=GotoVideoPageCommand}"
+                                                 CommandParameter="{Binding .}" />
+                                         </Image.GestureRecognizers>
+                                     </Image>
+                                 </Grid>
+                              </Frame>
+                     </DataTemplate>
+                 </CollectionView.ItemTemplate>
+            </CollectionView>
+</ContentPage>

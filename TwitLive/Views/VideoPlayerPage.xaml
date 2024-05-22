@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="TwitLive.Views.VideoPlayerPage"
+             xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+             x:DataType="viewModel:VideoPlayerViewModel"
+             BackgroundColor="#34AAD2"
+             Shell.BackgroundColor="#34AAD2"
+             Title="VideoPlayerPage">
+        <ScrollView>
+             <StackLayout>
+                <toolkit:MediaElement 
+                        HorizontalOptions="Center"
+                        Margin="10,10,10,10" 
+                        x:Name="mediaElement"
+                        MetaDataArtist="{Binding Show.PubDate}"
+                        MetaDataTitle="{Binding Show.Title}"
+                        MetaDataArtworkUrl="{Binding Show.Image}"
+                        WidthRequest="{OnIdiom Phone=320, Default=640}" 
+                        HeightRequest="{OnIdiom Phone=240, Default=320}" 
+                        Source="{Binding Show.Url}" 
+                        ShouldAutoPlay="True" 
+                        ShouldKeepScreenOn="True" />
+                 <Frame Background="White" 
+                        WidthRequest="{OnIdiom Phone=320, Default=640}"
+                        HorizontalOptions="Center"
+                        Margin="10,10,10,10" 
+                        Padding="10" 
+                        CornerRadius="10">
+                         <StackLayout>                                         
+                              <Label 
+                                  Margin="10,0,10,0"
+                                  HorizontalOptions="Center"
+                                  Text="{Binding Show.Title}" 
+                                  TextColor="Black" 
+                                  FontSize="Title" 
+                                  FontAttributes="Bold" />
+                             <WebView 
+                                 Margin="10,0,10,0"
+                                 WidthRequest="{OnIdiom Phone=310, Default=630}" 
+                                 HeightRequest="2000">
+                                 <WebView.Source>
+                                     <HtmlWebViewSource Html="{Binding Show.Description}" />
+                                 </WebView.Source>
+                             </WebView>
+                             
+                         </StackLayout>
+                     </Frame>
+             </StackLayout>
+        </ScrollView>
+</ContentPage>
