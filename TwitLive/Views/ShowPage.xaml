@@ -7,11 +7,8 @@
              x:Class="TwitLive.Views.ShowPage"
              x:DataType="viewModel:ShowPageViewModel"
              BackgroundColor="#34AAD2"
-             Shell.NavBarIsVisible="{OnPlatform Android=True, Default=False}"
+             Shell.NavBarIsVisible="True"
              Shell.BackgroundColor="#34AAD2">
-    <ContentPage.Behaviors>
-        <toolkit:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
-    </ContentPage.Behaviors>
      <RefreshView Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
             <CollectionView HorizontalScrollBarVisibility="Never"
                  VerticalScrollBarVisibility="Never"
@@ -23,31 +20,26 @@
  
                  <CollectionView.ItemTemplate>
                      <DataTemplate x:DataType="model:Show">
+                         <ScrollView>
                           <Frame Background="White" 
-                                WidthRequest="400"
-                                Margin="10,0,10,0" 
+                                WidthRequest="{OnIdiom Phone=320, Default=450}"
+                                HorizontalOptions="Center"
+                                Margin="10,10,10,10" 
                                 Padding="10" 
                                 CornerRadius="10">
-                                  <Grid
-                                        ColumnDefinitions="500"
-                                        RowDefinitions="*, 300">
-                                      <Label 
-                                          Grid.Row="0"
-                                          TextColor="Black"
-                                          HorizontalOptions="Start"
-                                          WidthRequest="350"
-                                          LineBreakMode="WordWrap"
-                                          Text="{Binding Title}"
-                                          FontSize="Title"
-                                          FontAttributes="Bold"
-                                          Margin="10,0,10,0" />
-                                     <Image
-                                         Grid.Row="1" 
+                                  <StackLayout>
+                                       <Label 
+                                          Margin="10,0,10,0"
+                                          HorizontalOptions="Center"
+                                          Text="{Binding Title}" 
+                                          TextColor="Black" 
+                                          FontSize="Title" 
+                                          FontAttributes="Bold" />
+                                     <Image 
                                          Source="{Binding Image}"
                                          Aspect="AspectFit"
                                          HorizontalOptions="Start"
-                                         WidthRequest="350"
-                                         HeightRequest="200"
+                                         WidthRequest="{OnIdiom Phone=300, Default=400}"
                                          Margin="10,0,10,0">
                                          <Image.GestureRecognizers>
                                              <TapGestureRecognizer  
@@ -55,8 +47,19 @@
                                                  CommandParameter="{Binding .}" />
                                          </Image.GestureRecognizers>
                                      </Image>
-                                 </Grid>
+                                       <WebView 
+                                             Margin="10,0,10,0"
+                                             WidthRequest="{OnIdiom Phone=300, Default=400}" 
+                                             HeightRequest="2000"
+                                             Navigating="Webview_Navigating"
+                                             x:Name="webview">
+                                             <WebView.Source>
+                                                 <HtmlWebViewSource Html="{Binding Description}" />
+                                             </WebView.Source>
+                                       </WebView>
+                                 </StackLayout>
                               </Frame>
+                         </ScrollView>
                      </DataTemplate>
                  </CollectionView.ItemTemplate>
                 <CollectionView.EmptyView>

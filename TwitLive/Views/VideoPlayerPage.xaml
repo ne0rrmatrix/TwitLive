@@ -42,7 +42,9 @@
                              <WebView 
                                  Margin="10,0,10,0"
                                  WidthRequest="{OnIdiom Phone=310, Default=630}" 
-                                 HeightRequest="2000">
+                                 HeightRequest="2000"
+                                 Navigating="Webview_Navigating"
+                                 x:Name="webview">
                                  <WebView.Source>
                                      <HtmlWebViewSource Html="{Binding Show.Description}" />
                                  </WebView.Source>
