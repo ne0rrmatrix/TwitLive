@@ -5,8 +5,12 @@
              x:Class="TwitLive.Views.VideoPlayerPage"
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
              x:DataType="viewModel:VideoPlayerViewModel"
+             Shell.NavBarIsVisible="False"
              BackgroundColor="#34AAD2"
              Shell.BackgroundColor="#34AAD2">
+     <ContentPage.Behaviors>
+        <toolkit:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
+    </ContentPage.Behaviors>
         <ScrollView>
              <StackLayout>
                 <toolkit:MediaElement 

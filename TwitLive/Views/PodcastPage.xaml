@@ -9,6 +9,9 @@
              Shell.NavBarIsVisible="False"
              Shell.BackgroundColor="#34AAD2"
              x:DataType="viewModel:PodcastPageViewModel">
+     <ContentPage.Behaviors>
+        <toolkit:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
+    </ContentPage.Behaviors>
     <Shell.BackButtonBehavior>
         <BackButtonBehavior IsVisible="False" />
     </Shell.BackButtonBehavior>

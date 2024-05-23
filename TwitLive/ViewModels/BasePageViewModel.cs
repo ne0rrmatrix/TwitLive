@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TwitLive.ViewModels;
-
 public partial class BasePageViewModel : ObservableObject
 {
     [ObservableProperty]

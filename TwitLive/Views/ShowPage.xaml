@@ -7,8 +7,11 @@
              x:Class="TwitLive.Views.ShowPage"
              x:DataType="viewModel:ShowPageViewModel"
              BackgroundColor="#34AAD2"
-             Shell.NavBarIsVisible="True"
+             Shell.NavBarIsVisible="{OnPlatform Android=True, Default=False}"
              Shell.BackgroundColor="#34AAD2">
+    <ContentPage.Behaviors>
+        <toolkit:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
+    </ContentPage.Behaviors>
      <RefreshView Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
             <CollectionView HorizontalScrollBarVisibility="Never"
                  VerticalScrollBarVisibility="Never"

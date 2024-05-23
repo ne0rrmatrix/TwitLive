@@ -1,9 +1,6 @@
-﻿
-using CommunityToolkit.Mvvm.ComponentModel;
-using SQLite;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TwitLive.Models;
-
 public partial class Shared: ObservableObject
 {
     string _title = string.Empty;

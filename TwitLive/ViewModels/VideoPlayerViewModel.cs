@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Web;
 using TwitLive.Models;
-using TwitLive.Services;
 
 namespace TwitLive.ViewModels;
 [QueryProperty(nameof(Show), "Show")]

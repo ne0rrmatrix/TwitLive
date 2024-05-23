@@ -1,7 +1,6 @@
 ﻿using TwitLive.Models;
 
 namespace TwitLive.Services;
-
 public static class PodcastService
 {
     public static List<Podcast> GetPodcasts()

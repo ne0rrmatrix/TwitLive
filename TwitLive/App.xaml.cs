@@ -1,6 +1,4 @@
-﻿using TwitLive.ViewModels;
-
-namespace TwitLive;
+﻿namespace TwitLive;
 public partial class App : Application
 {
     public App()
