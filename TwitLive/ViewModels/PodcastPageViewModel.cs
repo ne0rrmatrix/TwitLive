@@ -25,10 +25,8 @@ public partial class PodcastPageViewModel : BasePageViewModel
     void LoadPodcasts()
     {
         var item = PodcastService.GetPodcasts();
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            Podcasts = new ObservableCollection<Podcast>(item);
-        });
+        GetDispatcher.Dispatcher?.Dispatch(() =>
+        Podcasts = new ObservableCollection<Podcast>(item));
     }
 
     /// <summary>

@@ -38,10 +38,8 @@ public partial class ShowPageViewModel : BasePageViewModel
             return;
         }
         var result = FeedService.GetShowList(_url);
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            Shows = new ObservableCollection<Show>(result);
-        });
+        GetDispatcher.Dispatcher?.Dispatch(() => 
+        Shows = new ObservableCollection<Show>(result));
     }
 
     /// <summary>

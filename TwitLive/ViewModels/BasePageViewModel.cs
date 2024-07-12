@@ -53,6 +53,16 @@ public partial class BasePageViewModel : ObservableObject
         Orientation = IdiomOrientation.Span;
         OnPropertyChanged(nameof(Orientation));
     }
+    public record struct GetDispatcher
+    {
+        public static IDispatcher? Dispatcher
+        {
+            get
+            {
+                return Application.Current?.Dispatcher;
+            }
+        }
+    }
     public record struct IdiomOrientation
     {
         public static DeviceIdiom Idiom
