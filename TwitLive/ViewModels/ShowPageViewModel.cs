@@ -21,11 +21,15 @@ public partial class ShowPageViewModel : BasePageViewModel
         {
             var item = HttpUtility.UrlDecode(value);
             SetProperty(ref _url, item);
-            LoadShows();       
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                LoadShows();
+            });
         }
     }
     public ShowPageViewModel()
     {
+        _shows = [];
     }
     private void LoadShows()
     {
@@ -33,7 +37,11 @@ public partial class ShowPageViewModel : BasePageViewModel
         {
             return;
         }
-        Shows = new ObservableCollection<Show>(FeedService.GetShowList(_url));
+        var result = FeedService.GetShowList(_url);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Shows = new ObservableCollection<Show>(result);
+        });
     }
 
     /// <summary>
@@ -55,6 +63,8 @@ public partial class ShowPageViewModel : BasePageViewModel
     {
         IsRefreshing = true;
         IsBusy = true;
+        OnPropertyChanged(nameof(IsBusy));
+        OnPropertyChanged(nameof(IsRefreshing));
         if(Url is null)
         {
             IsBusy = false;
@@ -64,5 +74,7 @@ public partial class ShowPageViewModel : BasePageViewModel
         Shows = new ObservableCollection<Show>(FeedService.GetShowList(Url));
         IsBusy = false;
         IsRefreshing = false;
+        OnPropertyChanged(nameof(IsBusy));
+        OnPropertyChanged(nameof(IsRefreshing));
     });
 }

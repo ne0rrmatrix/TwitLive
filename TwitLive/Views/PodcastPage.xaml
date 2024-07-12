@@ -4,6 +4,7 @@
              xmlns:model="clr-namespace:TwitLive.Models"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+             xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
              x:Class="TwitLive.Views.PodcastPage"
              BackgroundColor="#34AAD2"
              Shell.NavBarIsVisible="False"
@@ -15,7 +16,7 @@
     <Shell.BackButtonBehavior>
         <BackButtonBehavior IsVisible="False" />
     </Shell.BackButtonBehavior>
-    <RefreshView Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+    <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" RefreshColor="Teal" IsRefreshing="{Binding IsRefreshing}">
     <CollectionView ItemsSource="{Binding Podcasts}"
                     VerticalScrollBarVisibility="Never"
                     HorizontalScrollBarVisibility="Never">
@@ -38,7 +39,7 @@
                                     TextColor="Black"
                                     FontAttributes="Bold"
                                     Margin="10,0,10,0" />
-                            <Image Grid.Row="1" Source="{Binding Image}"
+                            <Image Grid.Row="1"
                                     Aspect="AspectFit"
                                     WidthRequest="350"
                                     HorizontalOptions="Start"
@@ -48,6 +49,9 @@
                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}, Path=GotoShowPageCommand}"
                                                             CommandParameter="{Binding .}" />
                                 </Image.GestureRecognizers>
+                                <Image.Source>
+                                    <UriImageSource Uri="{Binding Image}" CachingEnabled="True"  CacheValidity="10:00:00:00" />
+                                </Image.Source>
                             </Image>
                             <Label Grid.Row="2" Text="{Binding Description}"
                                     FontSize="Body"

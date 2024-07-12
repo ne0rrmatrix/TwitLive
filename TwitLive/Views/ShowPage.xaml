@@ -4,12 +4,13 @@
              xmlns:model="clr-namespace:TwitLive.Models"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+             xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
              x:Class="TwitLive.Views.ShowPage"
              x:DataType="viewModel:ShowPageViewModel"
              BackgroundColor="#34AAD2"
              Shell.NavBarIsVisible="True"
              Shell.BackgroundColor="#34AAD2">
-     <RefreshView Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+     <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
             <CollectionView HorizontalScrollBarVisibility="Never"
                  VerticalScrollBarVisibility="Never"
                  ItemsSource="{Binding Shows}">
@@ -20,12 +21,10 @@
  
                  <CollectionView.ItemTemplate>
                      <DataTemplate x:DataType="model:Show">
-                         <ScrollView>
+                         <Grid HorizontalOptions="Center">
                           <Frame Background="White" 
-                                WidthRequest="{OnIdiom Phone=320, Default=450}"
+                                WidthRequest="400"
                                 HorizontalOptions="Center"
-                                Margin="10,10,10,10" 
-                                Padding="10" 
                                 CornerRadius="10">
                                   <StackLayout>
                                        <Label 
@@ -35,22 +34,23 @@
                                           TextColor="Black" 
                                           FontSize="Title" 
                                           FontAttributes="Bold" />
-                                     <Image 
-                                         Source="{Binding Image}"
-                                         Aspect="AspectFit"
-                                         HorizontalOptions="Start"
-                                         WidthRequest="{OnIdiom Phone=300, Default=400}"
-                                         Margin="10,0,10,0">
-                                         <Image.GestureRecognizers>
-                                             <TapGestureRecognizer  
-                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=GotoVideoPageCommand}"
-                                                 CommandParameter="{Binding .}" />
-                                         </Image.GestureRecognizers>
+                                        <Image
+                                          Aspect="AspectFit"
+                                          WidthRequest="{OnIdiom Phone=300, Default=380}" 
+                                          HorizontalOptions="Center"
+                                          HeightRequest="200"
+                                          Margin="10,0,10,0">
+                                          <Image.GestureRecognizers>
+                                              <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=GotoVideoPageCommand}"
+                                                                  CommandParameter="{Binding .}" />
+                                          </Image.GestureRecognizers>
+                                            <Image.Source>
+                                                <UriImageSource Uri="{Binding Image}" CachingEnabled="True"  CacheValidity="10:00:00:00" />
+                                            </Image.Source>
                                      </Image>
                                        <WebView 
-                                             Margin="10,0,10,0"
-                                             WidthRequest="{OnIdiom Phone=300, Default=400}" 
-                                             HeightRequest="2000"
+                                             WidthRequest="{OnIdiom Phone=300, Default=380}" 
+                                             HeightRequest="1600"
                                              Navigating="Webview_Navigating"
                                              x:Name="webview">
                                              <WebView.Source>
@@ -59,7 +59,7 @@
                                        </WebView>
                                  </StackLayout>
                               </Frame>
-                         </ScrollView>
+                         </Grid>
                      </DataTemplate>
                  </CollectionView.ItemTemplate>
                 <CollectionView.EmptyView>

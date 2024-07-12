@@ -3,6 +3,9 @@ using CommunityToolkit.Maui.Core;
 using Microsoft.Extensions.Logging;
 using TwitLive.ViewModels;
 using TwitLive.Views;
+#if WINDOWS
+using TwitLive.Handlers;
+#endif
 
 namespace TwitLive;
 public static class MauiProgram
@@ -15,6 +18,12 @@ public static class MauiProgram
             fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
         }).UseMauiCommunityToolkitMediaElement().UseMauiCommunityToolkitCore().UseMauiCommunityToolkit();
+        builder.ConfigureMauiHandlers(handlers =>
+        {
+#if WINDOWS
+            handlers.AddHandler<RefreshView, MauiRefreshViewHandler>();
+#endif
+        });
 #if DEBUG
         builder.Logging.AddDebug();
 #endif

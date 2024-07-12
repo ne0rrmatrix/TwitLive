@@ -32,7 +32,8 @@ public partial class BasePageViewModel : ObservableObject
     {
         MyMainDisplay = new();
         DeviceDisplay.MainDisplayInfoChanged += DeviceDisplayMainDisplayInfoChanged;
-        Orientation = OnDeviceOrientationChange();
+        Orientation = IdiomOrientation.Span;
+        OnPropertyChanged(nameof(Orientation));
     }
 
     ~BasePageViewModel()
@@ -47,42 +48,47 @@ public partial class BasePageViewModel : ObservableObject
     /// <param name="e"></param>
     public void DeviceDisplayMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
     {
-        if (sender is null)
-        {
-            return;
-        }
         MyMainDisplay = DeviceDisplay.Current.MainDisplayInfo;
         OnPropertyChanged(nameof(MyMainDisplay));
-        Orientation = OnDeviceOrientationChange();
+        Orientation = IdiomOrientation.Span;
         OnPropertyChanged(nameof(Orientation));
     }
-
-    /// <summary>
-    /// <c>OnDeviceOrientation</c> is a method that is used to set <see cref="Span"/> of <see cref="GridItemsLayout"/>
-    /// </summary>
-    /// <returns><see cref="int"/></returns>
-    public static int OnDeviceOrientationChange()
+    public record struct IdiomOrientation
     {
-        if ((int)DeviceDisplay.Current.MainDisplayInfo.Width <= 1920 && (int)DeviceDisplay.Current.MainDisplayInfo.Width != 0 && DeviceInfo.Current.Platform == DevicePlatform.WinUI)
+        public static DeviceIdiom Idiom
         {
-            return 2;
+            get
+            {
+                return DeviceInfo.Current.Idiom;
+            }
         }
-        switch (DeviceInfo.Current.Idiom == DeviceIdiom.Phone)
+        public  static DisplayOrientation Orientation
         {
-            case true:
-                return DeviceDisplay.Current.MainDisplayInfo.Orientation == DisplayOrientation.Portrait ? 1 : 2;
+            get
+            {
+                return DeviceDisplay.Current.MainDisplayInfo.Orientation;
+            }
         }
-        switch (DeviceInfo.Current.Platform == DevicePlatform.Android || DeviceInfo.Current.Platform == DevicePlatform.iOS)
+        public static int Span
         {
-            case true:
-                return DeviceDisplay.Current.MainDisplayInfo.Orientation == DisplayOrientation.Portrait ? 2 : 3;
-        }
-        switch (DeviceInfo.Current.Idiom == DeviceIdiom.Desktop)
-        {
-            case true:
-                return 3;
-            case false:
-                return 2;
+            get
+            {
+                if ((int)DeviceDisplay.Current.MainDisplayInfo.Width <= 1920
+                    && (int)DeviceDisplay.Current.MainDisplayInfo.Width != 0
+                    && DeviceInfo.Current.Platform == DevicePlatform.WinUI)
+                {
+                    return 2;
+                }
+                if (Idiom == DeviceIdiom.Phone)
+                {
+                    return Orientation == DisplayOrientation.Portrait ? 1 : 2;
+                }
+                if (Idiom == DeviceIdiom.Tablet || DeviceInfo.Current.Platform == DevicePlatform.iOS)
+                {
+                    return Orientation == DisplayOrientation.Portrait ? 2 : 3;
+                }
+                return Idiom == DeviceIdiom.Desktop ? 3 : 2;
+            }
         }
     }
 }

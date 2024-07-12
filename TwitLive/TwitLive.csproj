@@ -14,16 +14,15 @@
 		<OutputType>Exe</OutputType>
 		<RootNamespace>TwitLive</RootNamespace>
 		<UseMaui>true</UseMaui>
-		<MauiVersion>8.0.40</MauiVersion>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>TwitLive</ApplicationTitle>
+		<ApplicationTitle>TwitPodcasts</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.nerdnewsnavigator2.twitlive</ApplicationId>
+		<ApplicationId>com.nerdnewsnavigator2.twitpodcasts</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -36,7 +35,7 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
-
+	
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#34AAD2" />
@@ -57,9 +56,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
-		<PackageReference Include="CommunityToolkit.Maui.Core" Version="9.0.0" />
-		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="1.0.0-personal" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="99.0.0-preview2204" />
+		<PackageReference Include="CommunityToolkit.Maui.Core" Version="99.0.0-preview2204" />
+		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="99.0.0-preview2204" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="System.Drawing.Common" Version="8.0.5" />
 		<PackageReference Include="System.ServiceModel.Syndication" Version="8.0.0" />
@@ -68,4 +67,17 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
 	</ItemGroup>
 
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='android'">
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))=='false' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='maccatalyst' and $(Configuration) == 'Debug'">
+		<RuntimeIdentifiers>maccatalyst-arm64;maccatalyst-x64</RuntimeIdentifiers>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
+	  <CodesignKey>Apple Development: Created via API (7U62A7MVA4)</CodesignKey>
+	  <CodesignProvision>VS: WildCard Development</CodesignProvision>
+	</PropertyGroup>
 </Project>

@@ -14,8 +14,21 @@ public partial class PodcastPageViewModel : BasePageViewModel
     private ObservableCollection<Podcast> _podcasts;
     public PodcastPageViewModel()
     {
+        _podcasts = [];
+        ThreadPool.QueueUserWorkItem(_ =>
+        {
+            LoadPodcasts();
+        });
+       
+    }
+
+    void LoadPodcasts()
+    {
         var item = PodcastService.GetPodcasts();
-        _podcasts = new ObservableCollection<Podcast>(item);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Podcasts = new ObservableCollection<Podcast>(item);
+        });
     }
 
     /// <summary>
@@ -38,9 +51,13 @@ public partial class PodcastPageViewModel : BasePageViewModel
     {
         IsRefreshing = true;
         IsBusy = true;
+        OnPropertyChanged(nameof(IsBusy));
+        OnPropertyChanged(nameof(IsRefreshing));
         var item = PodcastService.GetPodcasts();
         Podcasts = new ObservableCollection<Podcast>(item);
         IsBusy = false;
         IsRefreshing = false;
+        OnPropertyChanged(nameof(IsBusy));
+        OnPropertyChanged(nameof(IsRefreshing));
     });
 }
