@@ -4,8 +4,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:TwitLive.Views"
-    Title="TwitLive"
-    Shell.NavBarIsVisible="{OnPlatform WinUI=False, Default=True}"
     Shell.BackgroundColor="#34AAD2"
     Shell.TabBarIsVisible="True">
     <Shell.MenuItemTemplate>

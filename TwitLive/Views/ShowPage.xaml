@@ -8,7 +8,6 @@
              x:Class="TwitLive.Views.ShowPage"
              x:DataType="viewModel:ShowPageViewModel"
              BackgroundColor="#34AAD2"
-             Shell.NavBarIsVisible="True"
              Shell.BackgroundColor="#34AAD2">
      <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
             <CollectionView HorizontalScrollBarVisibility="Never"
