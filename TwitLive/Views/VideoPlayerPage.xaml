@@ -4,7 +4,9 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="TwitLive.Views.VideoPlayerPage"
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+             xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
              x:DataType="viewModel:VideoPlayerViewModel"
+             ios:Page.UseSafeArea="False"
              Shell.NavBarIsVisible="False"
              BackgroundColor="#34AAD2"
              Shell.BackgroundColor="#34AAD2">

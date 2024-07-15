@@ -1,7 +1,4 @@
-﻿using System.Web;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitLive.Models;
+﻿using TwitLive.Models;
 
 namespace TwitLive.ViewModels;
 [QueryProperty(nameof(Show), "Show")]
