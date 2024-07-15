@@ -5,11 +5,16 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
              xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
+             xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:Class="TwitLive.Views.ShowPage"
              x:DataType="viewModel:ShowPageViewModel"
              BackgroundColor="#34AAD2"
              Shell.BackgroundColor="#34AAD2">
-     <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+    <ContentPage.Behaviors>
+            <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
+    </ContentPage.Behaviors>
+     
+    <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
             <CollectionView HorizontalScrollBarVisibility="Never"
                  VerticalScrollBarVisibility="Never"
                  ItemsSource="{Binding Shows}">

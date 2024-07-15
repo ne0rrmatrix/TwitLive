@@ -6,6 +6,6 @@ public partial class PodcastPage : ContentPage
 	public PodcastPage(PodcastPageViewModel viewModel)
 	{
 		InitializeComponent();
-        BindingContext = viewModel;
-    }
+		BindingContext = viewModel;
+	}
 }

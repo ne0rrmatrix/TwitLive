@@ -28,5 +28,21 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>ISpeechToText Uses Speech Recognition</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ISpeechToText Uses Microphone</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ICameraView Uses Camera</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>XSAppIconAssets</key>
+	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
 </dict>
 </plist>

@@ -4,6 +4,7 @@
              xmlns:model="clr-namespace:TwitLive.Models"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+             xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
              x:Class="TwitLive.Views.PodcastPage"
              BackgroundColor="#34AAD2"
@@ -11,7 +12,7 @@
              Shell.BackgroundColor="#34AAD2"
              x:DataType="viewModel:PodcastPageViewModel">
      <ContentPage.Behaviors>
-        <toolkit:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
+        <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
     </ContentPage.Behaviors>
     <Shell.BackButtonBehavior>
         <BackButtonBehavior IsVisible="False" />

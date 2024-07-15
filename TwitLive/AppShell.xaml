@@ -6,30 +6,6 @@
     xmlns:local="clr-namespace:TwitLive.Views"
     Shell.BackgroundColor="#34AAD2"
     Shell.TabBarIsVisible="True">
-    <Shell.MenuItemTemplate>
-        <DataTemplate>
-            <Grid
-                Margin="5"
-                ColumnDefinitions="50,*"
-                RowDefinitions="50">
-                <Image
-                    BackgroundColor="LightGray"
-                    IsVisible="{OnPlatform Default=True,
-                                           MacCatalyst=false}"
-                    MinimumHeightRequest="50"
-                    MinimumWidthRequest="50"
-                    Source="{Binding Icon}" />
-                <Label
-                    Grid.Column="1"
-                    FontAttributes="Bold"
-                    FontAutoScalingEnabled="True"
-                    FontSize="20"
-                    MinimumHeightRequest="48"
-                    Text="{Binding Title}"
-                    TextColor="Black" />
-            </Grid>
-        </DataTemplate>
-    </Shell.MenuItemTemplate>
     
     <TabBar>
        <Tab Title="Home" Route="Home" Icon="house.png">
