@@ -2,7 +2,7 @@ name: Build MAUI Project
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths-ignore:
       - '**/*.md'
       - '**/*.gitignore'
@@ -104,7 +104,7 @@ jobs:
 
     - uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '15.3.x'
+        xcode-version: '15.2.x'
 
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v3
