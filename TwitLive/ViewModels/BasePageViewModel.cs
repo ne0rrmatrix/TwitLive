@@ -2,7 +2,7 @@
 using TwitLive.Services;
 
 namespace TwitLive.ViewModels;
-public partial class BasePageViewModel : ObservableObject
+public partial class BasePageViewModel : ObservableObject, IDisposable
 {
 	public readonly FeedService FeedService;
 	[ObservableProperty]
@@ -30,6 +30,8 @@ public partial class BasePageViewModel : ObservableObject
 	/// </summary>
 	[ObservableProperty]
 	int orientation;
+	bool disposedValue;
+
 	public BasePageViewModel()
 	{
 		MyMainDisplay = new();
@@ -39,10 +41,6 @@ public partial class BasePageViewModel : ObservableObject
 		OnPropertyChanged(nameof(Orientation));
 	}
 
-	~BasePageViewModel()
-	{
-		DeviceDisplay.MainDisplayInfoChanged -= DeviceDisplayMainDisplayInfoChanged;
-	}
 
 	/// <summary>
 	/// <c>DeviceDisplay_MainDisplayInfoChanged</c> is a method that sets <see cref="Orientation"/>
@@ -103,5 +101,29 @@ public partial class BasePageViewModel : ObservableObject
 				return Idiom == DeviceIdiom.Desktop ? 3 : 2;
 			}
 		}
+	}
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				DeviceDisplay.MainDisplayInfoChanged -= DeviceDisplayMainDisplayInfoChanged;
+				FeedService.Dispose();
+			}
+			disposedValue = true;
+		}
+	}
+
+	~BasePageViewModel()
+	{
+	     Dispose(disposing: false);
+	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
 	}
 }

@@ -3,40 +3,40 @@
 namespace TwitLive.Models;
 public partial class Shared : ObservableObject
 {
-	string _title = string.Empty;
+	string title = string.Empty;
 	public string Title
 	{
-		get => _title;
-		set => SetProperty(ref _title, value);
+		get => title;
+		set => SetProperty(ref title, value);
 	}
-	string _description = string.Empty;
+	string description = string.Empty;
 	public string Description
 	{
-		get => _description;
-		set => SetProperty(ref _description, value);
+		get => description;
+		set => SetProperty(ref description, value);
 	}
-	string _link = string.Empty;
+	string link = string.Empty;
 	public string Link
 	{
-		get => _link;
-		set => SetProperty(ref _link, value);
+		get => link;
+		set => SetProperty(ref link, value);
 	}
-	string _image = string.Empty;
+	string image = string.Empty;
 	public string Image
 	{
-		get => _image;
-		set => SetProperty(ref _image, value);
+		get => image;
+		set => SetProperty(ref image, value);
 	}
-	string _url = string.Empty;
+	string url = string.Empty;
 	public string Url
 	{
-		get => _url;
-		set => SetProperty(ref _url, value);
+		get => url;
+		set => SetProperty(ref url, value);
 	}
-	DateTime _pubDate = DateTime.Now;
+	DateTime pubDate = DateTime.Now;
 	public DateTime PubDate
 	{
-		get => _pubDate;
-		set => SetProperty(ref _pubDate, value);
+		get => pubDate;
+		set => SetProperty(ref pubDate, value);
 	}
 }

@@ -12,6 +12,7 @@ namespace TwitLive.Services;
 public class FeedService : IDisposable
 {
 	readonly HttpClient httpClient;
+	bool disposedValue;
 
 	public FeedService()
 	{
@@ -170,42 +171,27 @@ public class FeedService : IDisposable
 	{
 		return DateTime.Parse(dateTime.Remove(25), new CultureInfo("en-US"));
 
-/* Unmerged change from project 'TwitLive(net8.0-ios)'
-Before:
-}
-After:
-	public void Dispose()
-	{
-		throw new NotImplementedException();
 	}
-}
-*/
 
-/* Unmerged change from project 'TwitLive(net8.0-maccatalyst)'
-Before:
-}
-After:
-	public void Dispose()
+	protected virtual void Dispose(bool disposing)
 	{
-		throw new NotImplementedException();
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				httpClient.Dispose();
+			}
+			disposedValue = true;
+		}
 	}
-}
-*/
-
-/* Unmerged change from project 'TwitLive(net8.0-windows10.0.19041.0)'
-Before:
-}
-After:
-	public void Dispose()
+	 ~FeedService()
 	{
-		throw new NotImplementedException();
-	}
-}
-*/
+	     Dispose(disposing: false);
 	}
 
 	public void Dispose()
 	{
-		throw new NotImplementedException();
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
 	}
 }
