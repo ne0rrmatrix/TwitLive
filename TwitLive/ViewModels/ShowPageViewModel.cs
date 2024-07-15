@@ -23,7 +23,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 			SetProperty(ref url, item);
 			ThreadPool.QueueUserWorkItem(async (state) =>
 			{
-				await LoadShows().ConfigureAwait(false);
+				await LoadShows(CancellationToken).ConfigureAwait(false);
 			});
 		}
 	}
@@ -31,13 +31,13 @@ public partial class ShowPageViewModel : BasePageViewModel
 	{
 		shows = [];
 	}
-	async Task LoadShows()
+	async Task LoadShows(CancellationToken cancellationToken = default)
 	{
 		if (url is null)
 		{
 			return;
 		}
-		var result = await FeedService.GetShowListAsync(url).ConfigureAwait(false);
+		var result = await FeedService.GetShowListAsync(url, cancellationToken).ConfigureAwait(false);
 		GetDispatcher.Dispatcher?.Dispatch(() => Shows = new ObservableCollection<Show>(result));
 	}
 
@@ -47,28 +47,29 @@ public partial class ShowPageViewModel : BasePageViewModel
 	/// <param name="show">A Url <see cref="string"/></param>
 	/// <returns></returns>
 	[RelayCommand]
-	public static async Task GotoVideoPage(Show show)
+	public static async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
 	{
 		var navigationParameter = new Dictionary<string, object>
 		{
 			{ "Show", show }
 		};
-		await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter);
+		await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter).WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>
 	{
-		Shows.Clear();
-		IsRefreshing = true;
-		IsBusy = true;
-		OnPropertyChanged(nameof(IsBusy));
-		OnPropertyChanged(nameof(IsRefreshing));
 		if (Url is null)
 		{
 			IsBusy = false;
 			IsRefreshing = false;
 			return;
 		}
+		Shows.Clear();
+		IsRefreshing = true;
+		IsBusy = true;
+		OnPropertyChanged(nameof(IsBusy));
+		OnPropertyChanged(nameof(IsRefreshing));
+
 		var updatedShows = await FeedService.GetShowListAsync(Url).ConfigureAwait(false);
 		Shows = new ObservableCollection<Show>(updatedShows);
 		IsBusy = false;

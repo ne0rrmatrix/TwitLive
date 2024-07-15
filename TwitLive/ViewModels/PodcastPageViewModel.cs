@@ -9,7 +9,7 @@ using TwitLive.Views;
 
 namespace TwitLive.ViewModels;
 public partial class PodcastPageViewModel : BasePageViewModel
-{
+{	
 	[ObservableProperty]
 	ObservableCollection<Podcast> podcasts;
 	public PodcastPageViewModel()
@@ -30,14 +30,14 @@ public partial class PodcastPageViewModel : BasePageViewModel
 	/// <param name="podcast">A Url <see cref="string"/></param>
 	/// <returns></returns>
 	[RelayCommand]
-	public static async Task GotoShowPage(Podcast podcast)
+	public static async Task GotoShowPage(Podcast podcast, CancellationToken cancellationToken = default)
 	{
 		var encodedUrl = HttpUtility.UrlEncode(podcast.Url);
 		var navigationParameter = new Dictionary<string, object>
 		{
 			{ "Url", encodedUrl }
 		};
-		await Shell.Current.GoToAsync($"//ShowPage", navigationParameter);
+		await Shell.Current.GoToAsync($"//ShowPage", navigationParameter).WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>
@@ -47,7 +47,7 @@ public partial class PodcastPageViewModel : BasePageViewModel
 		IsBusy = true;
 		OnPropertyChanged(nameof(IsBusy));
 		OnPropertyChanged(nameof(IsRefreshing));
-		var item = await FeedService.GetPodcasts().ConfigureAwait(false);
+		var item = await FeedService.GetPodcasts(CancellationToken).ConfigureAwait(false);
 		Podcasts = new ObservableCollection<Podcast>(item);
 		IsBusy = false;
 		IsRefreshing = false;
