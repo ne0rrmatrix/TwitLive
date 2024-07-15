@@ -4,6 +4,8 @@ using TwitLive.Services;
 namespace TwitLive.ViewModels;
 public partial class BasePageViewModel : ObservableObject, IDisposable
 {
+	readonly CancellationToken cancellationToken;
+	public CancellationToken CancellationToken => cancellationToken;
 	public readonly FeedService FeedService;
 	[ObservableProperty]
 	bool isRefreshing;
@@ -34,6 +36,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 
 	public BasePageViewModel()
 	{
+		cancellationToken = new();
 		MyMainDisplay = new();
 		FeedService = new FeedService();
 		DeviceDisplay.MainDisplayInfoChanged += DeviceDisplayMainDisplayInfoChanged;

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
 using TwitLive.Models;
@@ -18,13 +17,13 @@ public class FeedService : IDisposable
 	{
 		httpClient = new HttpClient();
 	}
-	public async Task<List<Podcast>> GetPodcasts()
+	public async Task<List<Podcast>> GetPodcasts(CancellationToken cancellationToken = default)
 	{
 		var Podcasts = new List<Podcast>();
-		var podcastList = await GetPodcastFeed().ConfigureAwait(false);
+		var podcastList = await GetPodcastFeed(cancellationToken).ConfigureAwait(false);
 		foreach (var item in podcastList)
 		{
-			var podcast = await GetPodcastList(item).ConfigureAwait(false);
+			var podcast = await GetPodcastList(item,cancellationToken).ConfigureAwait(false);
 			Podcasts.Add(podcast);
 		}
 		return Podcasts;
@@ -34,14 +33,14 @@ public class FeedService : IDisposable
 	/// Get OPML file from web and return list of current Podcasts.
 	/// </summary>
 	/// <returns><see cref="List{T}"/> <see cref="string"/> of URLs</returns>
-	async Task<List<string>> GetPodcastFeed()
+	async Task<List<string>> GetPodcastFeed(CancellationToken cancellationToken = default)
 	{
 		List<string> list = [];
 		string url = $"https://feeds.twit.tv/twitshows_video_hd.opml";
 
 		try
 		{
-			string xmlContent = await httpClient.GetStringAsync(url).ConfigureAwait(false);
+			string xmlContent = await httpClient.GetStringAsync(url,cancellationToken).ConfigureAwait(false);
 
 			using var stringReader = new StringReader(xmlContent);
 			using var xmlReader = XmlReader.Create(stringReader);
@@ -73,7 +72,7 @@ public class FeedService : IDisposable
 	/// </summary>
 	/// <param name="url">The URL of <see cref="Podcast"/></param> 
 	/// <returns><see cref="Podcast"/></returns>
-	public async Task<Podcast> GetPodcastList(string? url)
+	public async Task<Podcast> GetPodcastList(string? url, CancellationToken cancellationToken = default)
 	{
 		Podcast feed = new();
 		if (string.IsNullOrEmpty(url))
@@ -82,7 +81,7 @@ public class FeedService : IDisposable
 		}
 		try
 		{
-			string xmlContent = await httpClient.GetStringAsync(url).ConfigureAwait(false);
+			string xmlContent = await httpClient.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
 			XElement xElement = XElement.Parse(xmlContent);
 
 			foreach (var level1Element in xElement.Elements("channel"))
@@ -99,8 +98,9 @@ public class FeedService : IDisposable
 
 			return feed;
 		}
-		catch
+		catch (Exception ex)
 		{
+			System.Diagnostics.Trace.TraceError($"An error occurred: {ex.Message}");
 			return feed;
 		}
 	}
@@ -110,7 +110,7 @@ public class FeedService : IDisposable
 	/// </summary>
 	/// <param name="url">The Url of the <see cref="Show"/></param>
 	/// <returns><see cref="List{T}"/> <see cref="Show"/></returns>
-	public static async Task<List<Show>> GetShowListAsync(string url)
+	public static async Task<List<Show>> GetShowListAsync(string url, CancellationToken cancellationToken = default)
 	{
 		List<Show> shows = [];
 		XmlDocument rssDoc = [];
@@ -118,7 +118,7 @@ public class FeedService : IDisposable
 		try
 		{
 			using var httpClient = new HttpClient();
-			string xmlContent = await httpClient.GetStringAsync(url).ConfigureAwait(false);
+			string xmlContent = await httpClient.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
 			rssDoc.LoadXml(xmlContent);
 
 			var iTunesNamespace = "http://www.itunes.com/dtds/podcast-1.0.dtd";
@@ -156,8 +156,9 @@ public class FeedService : IDisposable
 
 			return shows;
 		}
-		catch
+		catch (Exception ex)
 		{
+			System.Diagnostics.Trace.TraceError($"An error occurred: {ex.Message}");
 			return shows;
 		}
 	}
