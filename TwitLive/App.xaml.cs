@@ -1,8 +1,12 @@
-﻿namespace TwitLive;
+﻿using TwitLive.Interfaces;
+
+namespace TwitLive;
 public partial class App : Application
 {
-	public App()
+	public static IDownload? Download { get; private set; }
+	public App(IDownload download)
 	{
+		Download = download;
 		InitializeComponent();
 		MainPage = new AppShell();
 	}

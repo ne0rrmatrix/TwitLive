@@ -51,7 +51,55 @@
                                             <Image.Source>
                                                 <UriImageSource Uri="{Binding Image}" CachingEnabled="True"  CacheValidity="10:00:00:00" />
                                             </Image.Source>
-                                     </Image>
+                                        </Image>
+                                        <Button
+                                            Margin="5"
+                                            BackgroundColor="Green"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=DownloadShowCommand}"
+                                            CommandParameter="{Binding .}"
+                                            FontAttributes="Bold"
+                                            FontSize="{OnIdiom Phone=8,
+                                                               Default=14}"
+                                            HeightRequest="48"
+                                            SemanticProperties.Description="download a show."
+                                            Text="Download"
+                                            TextColor="#FFFFFF"
+                                            WidthRequest="{OnIdiom Phone=70,
+                                                                   Default=100}">
+                                           <Button.Triggers>
+                                                <DataTrigger
+                                                    Binding="{Binding Path=IsNotDownloaded}"
+                                                    TargetType="Button"
+                                                    Value="False">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+
+                                        </Button>
+                                        <Button
+                                            Margin="5"
+                                            BackgroundColor="#CD2026"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=CancelCommand}"
+                                            CommandParameter="{Binding .}"
+                                            FontAttributes="Bold"
+                                            FontSize="{OnIdiom Phone=8,
+                                                               Default=14}"
+                                            HeightRequest="48"
+                                            SemanticProperties.Description="cancel a current download."
+                                            Text="Cancel"
+                                            TextColor="#FFFFFF"
+                                            WidthRequest="{OnIdiom Phone=70,
+                                                                   Default=100}">
+                                              <Button.Triggers>
+                                                <DataTrigger
+                                                    Binding="{Binding Path=IsDownloading}"
+                                                    TargetType="Button"
+                                                    Value="False">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+                                       
                                        <WebView 
                                              WidthRequest="{OnIdiom Phone=300, Default=380}" 
                                              HeightRequest="1600"

@@ -1,6 +1,8 @@
-﻿using CommunityToolkit.Maui;
+﻿using TwitLive.Primitives;
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using Microsoft.Extensions.Logging;
+using TwitLive.Interfaces;
 using TwitLive.ViewModels;
 using TwitLive.Views;
 #if WINDOWS
@@ -45,6 +47,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<VideoPlayerViewModel>();
 
 		builder.Services.AddSingleton<BasePageViewModel>();
+		builder.Services.AddSingleton<IDownload, DownloadManager>();
 
 		return builder.Build();
 	}
