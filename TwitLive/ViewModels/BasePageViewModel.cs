@@ -44,7 +44,6 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		OnPropertyChanged(nameof(Orientation));
 	}
 
-
 	/// <summary>
 	/// <c>DeviceDisplay_MainDisplayInfoChanged</c> is a method that sets <see cref="Orientation"/>
 	/// </summary>

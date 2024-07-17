@@ -14,6 +14,9 @@
         <Tab Title="VideoPlayer" Route="VideoPlayerPage" Icon="videoplayer.png">
             <ShellContent ContentTemplate="{DataTemplate local:VideoPlayerPage}" />
         </Tab>
+        <Tab Title="Downloads" Route="DownloadsPage" Icon="dotnet_bot.png">
+            <ShellContent ContentTemplate="{DataTemplate local:DownloadsPage}" />
+        </Tab>
     </TabBar>
     
     <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" Route="MainPage" />

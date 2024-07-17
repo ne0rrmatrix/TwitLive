@@ -1,9 +1,15 @@
-﻿using TwitLive.Primitives;
+﻿using SQLite;
+using TwitLive.Primitives;
 
 namespace TwitLive.Models;
+[Table("Shows")]
 public partial class Show : Shared, IDisposable
 {
+	[PrimaryKey, AutoIncrement, Column("Id")]
+	public int ID { get; set; }
+	bool disposedValue;
 	CancellationTokenSource cancellationTokenSource = new();
+	[Ignore]
 	public CancellationTokenSource CancellationTokenSource
 	{
 		get => cancellationTokenSource;
@@ -28,14 +34,12 @@ public partial class Show : Shared, IDisposable
 		set => SetProperty(ref isDownloading, value);
 	}
 	DownloadStatus status = DownloadStatus.NotDownloaded;
-	bool disposedValue;
-
+	[Ignore]
 	public DownloadStatus Status
 	{
 		get => status;
 		set => SetProperty(ref status, value);
 	}
-
 	protected virtual void Dispose(bool disposing)
 	{
 		if (!disposedValue)

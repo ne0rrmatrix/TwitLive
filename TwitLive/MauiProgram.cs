@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using TwitLive.Interfaces;
 using TwitLive.ViewModels;
 using TwitLive.Views;
+using TwitLive.Database;
+
 #if WINDOWS
 using TwitLive.Handlers;
 #endif
@@ -46,9 +48,12 @@ public static class MauiProgram
 #endif
 		builder.Services.AddSingleton<VideoPlayerViewModel>();
 
+		builder.Services.AddTransient<DownloadsPage>();
+		builder.Services.AddTransient<DownloadsPageViewModel>();
+
 		builder.Services.AddSingleton<BasePageViewModel>();
 		builder.Services.AddSingleton<IDownload, DownloadManager>();
-
+		builder.Services.AddSingleton<IDb, Db>();
 		return builder.Build();
 	}
 }

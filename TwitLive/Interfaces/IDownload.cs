@@ -7,4 +7,5 @@ public interface IDownload
 {
 	public List<Show> show { get; set; }
 	public Task<DownloadStatus> DownloadAsync(Show show, IProgress<double>? progress = default, CancellationToken token = default);
+	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
 }

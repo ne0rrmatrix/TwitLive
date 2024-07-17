@@ -5,11 +5,14 @@ namespace TwitLive.Primitives;
 public partial class DownloadManager : IDownload
 {
 	HttpClient? client;
+	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
+	protected virtual void OnProgressChanged(DownloadProgressEventArgs e) => ProgressChanged?.Invoke(null, e);
 	public List<Show> show { get; set; }
-
-	public DownloadManager()
+	IDb db { get; set; }
+	public DownloadManager(IDb db)
 	{
 		show = [];
+		this.db = db;
 	}
 	public void UseCustomHttpClient(HttpClient? httpClient)
 	{
@@ -40,6 +43,7 @@ public partial class DownloadManager : IDownload
 				show.IsDownloaded = false;
 				show.IsDownloading = false;
 				this.show.Remove(show);
+				OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Error));
 				return DownloadStatus.Error;
 			}
 
@@ -59,6 +63,7 @@ public partial class DownloadManager : IDownload
 					show.IsDownloaded = false;
 					show.IsDownloading = false;
 					this.show.Remove(show);
+					OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Cancelled));
 					return DownloadStatus.Cancelled;
 				}
 				var read = await stream.ReadAsync(buffer, token).ConfigureAwait(false);
@@ -76,8 +81,10 @@ public partial class DownloadManager : IDownload
 			output.Close();
 			show.IsDownloading = false;
 			show.IsDownloaded = true;
+			await db.SaveShowAsync(show).ConfigureAwait(false);
 			this.show.Remove(show);
-			
+			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Downloaded));
+
 		}
 		catch (Exception ex)
 		{
@@ -86,6 +93,7 @@ public partial class DownloadManager : IDownload
 			show.IsDownloaded = false;
 			show.IsDownloading = false;
 			this.show.Remove(show);
+			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Error));
 			return DownloadStatus.Error;
 		}
 		return DownloadStatus.Downloaded;

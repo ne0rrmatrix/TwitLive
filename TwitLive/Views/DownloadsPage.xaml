@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TwitLive.Views.DownloadsPage"
+             xmlns:model="clr-namespace:TwitLive.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+             xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
+             xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             x:DataType="viewModel:DownloadsPageViewModel"
+             BackgroundColor="#34AAD2"
+             Shell.BackgroundColor="#34AAD2">
+        
+        <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Behaviors>
+            <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
+    </ContentPage.Behaviors>
+     
+    <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView HorizontalScrollBarVisibility="Never"
+                 VerticalScrollBarVisibility="Never"
+                 ItemsSource="{Binding Shows}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                        Span="{Binding Orientation}" />
+                </CollectionView.ItemsLayout>
+ 
+                 <CollectionView.ItemTemplate>
+                     <DataTemplate x:DataType="model:Show">
+                         <Grid HorizontalOptions="Center">
+                          <Frame Background="White" 
+                                WidthRequest="400"
+                                HorizontalOptions="Center"
+                                CornerRadius="10">
+                                  <StackLayout>
+                                       <Label 
+                                          Margin="10,0,10,0"
+                                          HorizontalOptions="Center"
+                                          Text="{Binding Title}" 
+                                          TextColor="Black" 
+                                          FontSize="Title" 
+                                          FontAttributes="Bold" />
+                                        <Image
+                                          Aspect="AspectFit"
+                                          WidthRequest="{OnIdiom Phone=300, Default=380}" 
+                                          HorizontalOptions="Center"
+                                          HeightRequest="200"
+                                          Margin="10,0,10,0">
+                                          <Image.GestureRecognizers>
+                                              <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=GotoVideoPageCommand}"
+                                                                  CommandParameter="{Binding .}" />
+                                          </Image.GestureRecognizers>
+                                            <Image.Source>
+                                                <UriImageSource Uri="{Binding Image}" CachingEnabled="True"  CacheValidity="10:00:00:00" />
+                                            </Image.Source>
+                                        </Image>
+                                        <Button
+                                            Margin="5"
+                                            BackgroundColor="Red"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=DeleteShowCommand}"
+                                            CommandParameter="{Binding .}"
+                                            FontAttributes="Bold"
+                                            IsEnabled="True"
+                                            FontSize="{OnIdiom Phone=8,
+                                                               Default=14}"
+                                            HeightRequest="48"
+                                            SemanticProperties.Description="download a show."
+                                            Text="Delete"
+                                            TextColor="#FFFFFF"
+                                            WidthRequest="{OnIdiom Phone=70,
+                                                                   Default=100}">
+
+                                        </Button>
+                                       <WebView 
+                                             WidthRequest="{OnIdiom Phone=300, Default=380}" 
+                                             HeightRequest="1600"
+                                             Navigating="Webview_Navigating"
+                                             x:Name="webview">
+                                             <WebView.Source>
+                                                 <HtmlWebViewSource Html="{Binding Description}" />
+                                             </WebView.Source>
+                                       </WebView>
+                                 </StackLayout>
+                              </Frame>
+                         </Grid>
+                     </DataTemplate>
+                 </CollectionView.ItemTemplate>
+     </CollectionView>
+    </RefreshView>
+</ContentPage>
