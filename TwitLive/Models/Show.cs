@@ -27,12 +27,6 @@ public partial class Show : Shared, IDisposable
 		get => isDownloading;
 		set => SetProperty(ref isDownloading, value);
 	}
-	bool isNotDownloaded = true;
-	public bool IsNotDownloaded
-	{
-		get => isNotDownloaded;
-		set => SetProperty(ref isNotDownloaded, value);
-	}
 	DownloadStatus status = DownloadStatus.NotDownloaded;
 	bool disposedValue;
 

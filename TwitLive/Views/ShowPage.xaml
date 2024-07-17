@@ -10,6 +10,11 @@
              x:DataType="viewModel:ShowPageViewModel"
              BackgroundColor="#34AAD2"
              Shell.BackgroundColor="#34AAD2">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ContentPage.Behaviors>
             <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
     </ContentPage.Behaviors>
@@ -58,22 +63,16 @@
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=DownloadShowCommand}"
                                             CommandParameter="{Binding .}"
                                             FontAttributes="Bold"
+                                            IsEnabled="True"
                                             FontSize="{OnIdiom Phone=8,
                                                                Default=14}"
                                             HeightRequest="48"
                                             SemanticProperties.Description="download a show."
                                             Text="Download"
                                             TextColor="#FFFFFF"
+                                            IsVisible="{Binding IsDownloaded, Converter={StaticResource InvertedBoolConverter}}"
                                             WidthRequest="{OnIdiom Phone=70,
                                                                    Default=100}">
-                                           <Button.Triggers>
-                                                <DataTrigger
-                                                    Binding="{Binding Path=IsNotDownloaded}"
-                                                    TargetType="Button"
-                                                    Value="False">
-                                                    <Setter Property="IsVisible" Value="False" />
-                                                </DataTrigger>
-                                            </Button.Triggers>
 
                                         </Button>
                                         <Button
@@ -87,17 +86,10 @@
                                             HeightRequest="48"
                                             SemanticProperties.Description="cancel a current download."
                                             Text="Cancel"
+                                            IsVisible="{Binding IsDownloading}"
                                             TextColor="#FFFFFF"
                                             WidthRequest="{OnIdiom Phone=70,
                                                                    Default=100}">
-                                              <Button.Triggers>
-                                                <DataTrigger
-                                                    Binding="{Binding Path=IsDownloading}"
-                                                    TargetType="Button"
-                                                    Value="False">
-                                                    <Setter Property="IsVisible" Value="False" />
-                                                </DataTrigger>
-                                            </Button.Triggers>
                                         </Button>
                                        
                                        <WebView 

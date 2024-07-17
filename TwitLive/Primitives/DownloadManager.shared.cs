@@ -5,10 +5,11 @@ namespace TwitLive.Primitives;
 public partial class DownloadManager : IDownload
 {
 	HttpClient? client;
-	public Show show { get; set; } = new Show();
+	public List<Show> show { get; set; }
 
 	public DownloadManager()
 	{
+		show = [];
 	}
 	public void UseCustomHttpClient(HttpClient? httpClient)
 	{
@@ -19,11 +20,14 @@ public partial class DownloadManager : IDownload
 	}
 	public async Task<DownloadStatus> DownloadAsync(Show show, IProgress<double>? progress = default, CancellationToken token = default)
 	{
-		this.show = show;
 		var file = FileService.GetFileName(show.Url);
 		ArgumentNullException.ThrowIfNull(file);
 		ArgumentNullException.ThrowIfNull(progress);
-
+		show.IsDownloaded = !show.IsDownloaded;
+		show.IsDownloading = !show.IsDownloading;
+		show.Status = DownloadStatus.Downloading;
+		this.show.Add(show);
+		
 		var url = show.Url;
 		client ??= new HttpClient();
 		try
@@ -33,6 +37,9 @@ public partial class DownloadManager : IDownload
 			if (!response.IsSuccessStatusCode)
 			{
 				System.Diagnostics.Trace.TraceError($"Error downloading file: {response.StatusCode}");
+				show.IsDownloaded = false;
+				show.IsDownloading = false;
+				this.show.Remove(show);
 				return DownloadStatus.Error;
 			}
 
@@ -49,6 +56,9 @@ public partial class DownloadManager : IDownload
 					System.Diagnostics.Trace.TraceInformation("Download cancelled");
 					output.Close();
 					FileService.DeleteFile(url);
+					show.IsDownloaded = false;
+					show.IsDownloading = false;
+					this.show.Remove(show);
 					return DownloadStatus.Cancelled;
 				}
 				var read = await stream.ReadAsync(buffer, token).ConfigureAwait(false);
@@ -64,14 +74,20 @@ public partial class DownloadManager : IDownload
 				}
 			} while (isMoreToRead);
 			output.Close();
+			show.IsDownloading = false;
+			show.IsDownloaded = true;
+			this.show.Remove(show);
+			
 		}
 		catch (Exception ex)
 		{
 			System.Diagnostics.Trace.TraceError(ex.Message);
 			File.Delete(show.FileName);
+			show.IsDownloaded = false;
+			show.IsDownloading = false;
+			this.show.Remove(show);
 			return DownloadStatus.Error;
 		}
-
 		return DownloadStatus.Downloaded;
 	}
 }

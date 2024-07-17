@@ -1,7 +1,5 @@
-﻿using System.Collections.ObjectModel;
-using System.Web;
+﻿using System.Web;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TwitLive.Models;
 using TwitLive.Primitives;
@@ -12,8 +10,12 @@ namespace TwitLive.ViewModels;
 [QueryProperty("Url", "Url")]
 public partial class ShowPageViewModel : BasePageViewModel
 {
-	[ObservableProperty]
-	ObservableCollection<Show> shows;
+	List<Show> shows;
+	public List<Show> Shows
+	{
+		get => shows;
+		set => SetProperty(ref shows, value);
+	}
 
 	double percentage = 0;
 	readonly Progress<double> progress;
@@ -49,12 +51,12 @@ public partial class ShowPageViewModel : BasePageViewModel
 		}
 		ArgumentNullException.ThrowIfNull(App.Download);
 		var result = await FeedService.GetShowListAsync(url, cancellationToken).ConfigureAwait(false);
-		if (result.Exists(x => x.Url == App.Download.show.Url))
+		foreach (var item in App.Download.show)
 		{
-
-			result[result.FindIndex(x => x.Url == App.Download.show.Url)] = App.Download.show;
+			result[result.FindIndex(x => x.Url == item.Url)] = item;
 		}
-		GetDispatcher.Dispatcher?.Dispatch(() => Shows = new ObservableCollection<Show>(result));
+		result.FindAll(item => (File.Exists(item.FileName))).ForEach(x => x.IsDownloaded = true);
+		GetDispatcher.Dispatcher?.Dispatch(() => Shows = result);
 	}
 
 	[RelayCommand]
@@ -67,43 +69,43 @@ public partial class ShowPageViewModel : BasePageViewModel
 	}
 
 	[RelayCommand]
-	public async Task DownloadShow(Show show)
+	public void DownloadShow(Show show)
 	{
 		ArgumentNullException.ThrowIfNull(App.Download);
-		show.IsDownloaded = false;
-		show.IsDownloading = true;
-		show.IsNotDownloaded = false;
 		show.Status = DownloadStatus.Downloading;
-		if(show.CancellationTokenSource.IsCancellationRequested)
+		if (show.CancellationTokenSource.IsCancellationRequested)
 		{
 			show.CancellationTokenSource.Dispose();
 			show.CancellationTokenSource = new();
 		}
-		var result = await App.Download.DownloadAsync(show,progress, show.CancellationTokenSource.Token).ConfigureAwait(false);
-		if (result == DownloadStatus.Downloaded)
+		ThreadPool.QueueUserWorkItem(async (state) =>
 		{
-			show.IsNotDownloaded = false;
-			show.IsDownloading = false;
-			show.IsDownloaded = true;
-			show.Status = DownloadStatus.Downloaded;
-			GetDispatcher.Dispatcher?.Dispatch(async () => await Shell.Current.DisplayAlert("Download", "Download Complete", "Ok").ConfigureAwait(false));
-		}
-		else if (result == DownloadStatus.Error)
-		{
-			show.IsNotDownloaded = true;
-			show.IsDownloading = false;
-			show.IsDownloaded = false;
-			show.Status = DownloadStatus.Error;
-			GetDispatcher.Dispatcher?.Dispatch(async () => await Shell.Current.DisplayAlert("Download", "Download Failed", "Ok").ConfigureAwait(false));
-		}
-		else if (result == DownloadStatus.Cancelled)
-		{
-			show.IsNotDownloaded = true;
-			show.IsDownloading = false;
-			show.IsDownloaded = false;
-			show.Status = DownloadStatus.Cancelled;
-			GetDispatcher.Dispatcher?.Dispatch(async () => await Shell.Current.DisplayAlert("Download", "Download Cancelled", "Ok").ConfigureAwait(false));
-		}
+			var result = await App.Download.DownloadAsync(show, progress, show.CancellationTokenSource.Token).ConfigureAwait(false);
+			GetDispatcher.Dispatcher?.Dispatch(async () =>
+			{
+				switch (result)
+				{
+					case DownloadStatus.Downloaded:
+						show.Status = DownloadStatus.Downloaded;
+						await Shell.Current.DisplayAlert("Download", "Download Complete", "Ok").ConfigureAwait(false);
+						break;
+					case DownloadStatus.Error:
+						show.Status = DownloadStatus.Error;
+						await Shell.Current.DisplayAlert("Download", "Download Failed", "Ok").ConfigureAwait(false);
+						break;
+					case DownloadStatus.Cancelled:
+						show.Status = DownloadStatus.Cancelled;
+						await Shell.Current.DisplayAlert("Download", "Download Cancelled", "Ok").ConfigureAwait(false);
+						break;
+					case DownloadStatus.Downloading:
+						show.Status = DownloadStatus.Downloading;
+						break;
+					case DownloadStatus.NotDownloaded:
+						show.Status = DownloadStatus.NotDownloaded;
+						break;
+				}
+			});
+		});
 	}
 
 	/// <summary>
@@ -114,6 +116,10 @@ public partial class ShowPageViewModel : BasePageViewModel
 	[RelayCommand]
 	public static async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
 	{
+		if(File.Exists(show.FileName))
+		{
+			show.Url = show.FileName;
+		}
 		var navigationParameter = new Dictionary<string, object>
 		{
 			{ "Show", show }
@@ -134,9 +140,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 		IsBusy = true;
 		OnPropertyChanged(nameof(IsBusy));
 		OnPropertyChanged(nameof(IsRefreshing));
-
-		var updatedShows = await FeedService.GetShowListAsync(Url).ConfigureAwait(false);
-		Shows = new ObservableCollection<Show>(updatedShows);
+		await LoadShows(CancellationToken.None).ConfigureAwait(false);
 		IsBusy = false;
 		IsRefreshing = false;
 		OnPropertyChanged(nameof(IsBusy));
