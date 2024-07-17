@@ -1,4 +1,5 @@
-﻿using TwitLive.Interfaces;
+﻿using MetroLog;
+using TwitLive.Interfaces;
 using TwitLive.Models;
 
 namespace TwitLive.Primitives;
@@ -9,6 +10,7 @@ public partial class DownloadManager : IDownload
 	protected virtual void OnProgressChanged(DownloadProgressEventArgs e) => ProgressChanged?.Invoke(null, e);
 	public List<Show> show { get; set; }
 	IDb db { get; set; }
+	readonly ILogger logger = LoggerFactory.GetLogger(nameof(DownloadManager));
 	public DownloadManager(IDb db)
 	{
 		show = [];
@@ -39,7 +41,7 @@ public partial class DownloadManager : IDownload
 			var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
 			if (!response.IsSuccessStatusCode)
 			{
-				System.Diagnostics.Trace.TraceError($"Error downloading file: {response.StatusCode}");
+				logger.Info($"Error downloading file: {response.StatusCode}");
 				show.IsDownloaded = false;
 				show.IsDownloading = false;
 				this.show.Remove(show);
@@ -57,7 +59,7 @@ public partial class DownloadManager : IDownload
 			{
 				if(token.IsCancellationRequested)
 				{
-					System.Diagnostics.Trace.TraceInformation("Download cancelled");
+					logger.Info("Download cancelled");
 					output.Close();
 					FileService.DeleteFile(url);
 					show.IsDownloaded = false;
@@ -83,12 +85,13 @@ public partial class DownloadManager : IDownload
 			show.IsDownloaded = true;
 			await db.SaveShowAsync(show).ConfigureAwait(false);
 			this.show.Remove(show);
+			logger.Info("Download complete");
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Downloaded));
 
 		}
 		catch (Exception ex)
 		{
-			System.Diagnostics.Trace.TraceError(ex.Message);
+			logger.Info($"Error downloading file: {ex.Message}");
 			File.Delete(show.FileName);
 			show.IsDownloaded = false;
 			show.IsDownloading = false;
@@ -102,6 +105,7 @@ public partial class DownloadManager : IDownload
 
 public static class FileService
 {
+	static readonly ILogger logger = LoggerFactory.GetLogger(nameof(FileService));
 	public static void DeleteFile(string url)
 	{
 		var tempFile = GetFileName(url);
@@ -110,12 +114,12 @@ public static class FileService
 			if (File.Exists(tempFile))
 			{
 				File.Delete(tempFile);
-				System.Diagnostics.Trace.TraceInformation($"Deleted file {tempFile}");
+				logger.Info($"Deleted file {tempFile}");
 			}
 		}
 		catch (Exception ex)
 		{
-			System.Diagnostics.Trace.TraceError(ex.Message);
+			logger.Error($"Error deleting file: {tempFile}, Messsage: {ex.Message}");
 		}
 	}
 

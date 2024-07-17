@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using MetroLog;
+using SQLite;
 using TwitLive.Interfaces;
 using TwitLive.Models;
 
@@ -8,7 +9,7 @@ public class Db : IDb
 	public static string DbPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MyData.db");
 	SQLiteAsyncConnection? db;
 	public const SQLite.SQLiteOpenFlags Flags = SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.Create | SQLite.SQLiteOpenFlags.SharedCache;
-
+	readonly ILogger logger =  LoggerFactory.GetLogger(nameof(Db));
 	public Db()
 	{
 	}
@@ -19,9 +20,9 @@ public class Db : IDb
 			return;
 		}
 		db = new SQLiteAsyncConnection(DbPath, Flags);
-		System.Diagnostics.Trace.TraceInformation("Database created");
+		logger.Info("Database created");
 		await db.CreateTableAsync<Show>();
-		System.Diagnostics.Trace.TraceInformation("Table created");
+		logger.Info("Table created");
 	}
 	public async Task<List<Show>> GetShowsAsync()
 	{

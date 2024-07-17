@@ -1,6 +1,7 @@
 ﻿using System.Web;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using MetroLog;
 using TwitLive.Interfaces;
 using TwitLive.Models;
 using TwitLive.Primitives;
@@ -36,6 +37,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 			});
 		}
 	}
+	readonly ILogger logger = LoggerFactory.GetLogger(nameof(ShowPageViewModel));
 	public ShowPageViewModel()
 	{
 		shows = [];
@@ -61,10 +63,10 @@ public partial class ShowPageViewModel : BasePageViewModel
 	}
 
 	[RelayCommand]
-	public static Task Cancel(Show show)
+	public Task Cancel(Show show)
 	{
 		ArgumentNullException.ThrowIfNull(show.CancellationTokenSource.Token);
-		System.Diagnostics.Trace.TraceInformation("Cancelling download");
+		logger.Info("Cancelling download");
 		show.CancellationTokenSource.Cancel();
 		return Task.CompletedTask;
 	}
@@ -163,7 +165,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 			if (temp > percentage)
 			{
 				percentage = temp;
-				System.Diagnostics.Trace.TraceInformation($"Progress: {percentage}");
+				logger.Info($"Progress: {percentage}");
 			}
 		});
 	}
