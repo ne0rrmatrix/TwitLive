@@ -37,6 +37,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		show = currentShow.Show;
 		item = currentShow.Db;
 	}
+	
 	async void MediaElement_MediaOpened(object? sender, EventArgs e)
 	{
 		ArgumentNullException.ThrowIfNull(show);
@@ -57,6 +58,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 			});
 		}
 	}
+	
 	async void UpdatePlayedTime(object? sender, ElapsedEventArgs e)
 	{
 		if (item is not null && show is not null && !string.IsNullOrEmpty(show.Title))
@@ -90,8 +92,6 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		timer.Elapsed += UpdatePlayedTime;
 		timer.Start();
 	}
-
-	
 
 	public void StopTimer()
 	{

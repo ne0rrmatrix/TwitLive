@@ -11,7 +11,6 @@ using TwitLive.Views;
 using LoggerFactory = MetroLog.LoggerFactory;
 using LogLevel = MetroLog.LogLevel;
 
-
 #if WINDOWS
 using TwitLive.Handlers;
 #endif

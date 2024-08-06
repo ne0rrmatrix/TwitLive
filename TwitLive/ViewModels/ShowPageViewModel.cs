@@ -123,13 +123,8 @@ public partial class ShowPageViewModel : BasePageViewModel
 		});
 	}
 
-	/// <summary>
-	/// A Method that passes a Url <see cref="string"/> to <see cref="ShowPage"/>
-	/// </summary>
-	/// <param name="show">A Url <see cref="string"/></param>
-	/// <returns></returns>
 	[RelayCommand]
-	public async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
+	public static async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
 	{
 		if(File.Exists(show.FileName))
 		{

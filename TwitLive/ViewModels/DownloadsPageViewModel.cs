@@ -10,6 +10,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	[ObservableProperty]
 	List<Show> shows;
 	IDb db { get; set; }
+
 	public DownloadsPageViewModel(IDb db)
 	{
 		this.db = db;
@@ -61,6 +62,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		Shows.Clear();
 		await GetShows().ConfigureAwait(false);
 	}
+
 	public ICommand PullToRefreshCommand => new Command(async () =>
 	{
 		Shows.Clear();

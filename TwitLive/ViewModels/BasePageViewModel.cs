@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MetroLog;
 using TwitLive.Primitives;
 using TwitLive.Services;
 
@@ -43,11 +42,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		IsBusy = false;
 		return Task.CompletedTask;
 	}
-	/// <summary>
-	/// <c>DeviceDisplay_MainDisplayInfoChanged</c> is a method that sets <see cref="Orientation"/>
-	/// </summary>
-	/// <param name="sender"></param>
-	/// <param name="e"></param>
+
 	public void DeviceDisplayMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
 	{
 		MyMainDisplay = DeviceDisplay.Current.MainDisplayInfo;
@@ -55,6 +50,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		Orientation = IdiomOrientation.Span;
 		OnPropertyChanged(nameof(Orientation));
 	}
+
 	public record struct GetDispatcher
 	{
 		public static IDispatcher? Dispatcher
@@ -65,6 +61,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 			}
 		}
 	}
+
 	public record struct IdiomOrientation
 	{
 		public static DeviceIdiom Idiom
@@ -127,6 +124,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		OnPropertyChanged(nameof(PercentageLabel));
 		OnPropertyChanged(nameof(IsBusy));
 	}
+
 	~BasePageViewModel()
 	{
 	     Dispose(disposing: false);

@@ -10,9 +10,11 @@ public class Db : IDb
 	SQLiteAsyncConnection? db;
 	public const SQLite.SQLiteOpenFlags Flags = SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.Create | SQLite.SQLiteOpenFlags.SharedCache;
 	readonly ILogger logger =  LoggerFactory.GetLogger(nameof(Db));
+
 	public Db()
 	{
 	}
+
 	public async Task Init()
 	{
 		if (db is not null)
@@ -24,6 +26,7 @@ public class Db : IDb
 		await db.CreateTableAsync<Show>();
 		logger.Info("Table created");
 	}
+	
 	public async Task<List<Show>> GetShowsAsync()
 	{
 		await Init();

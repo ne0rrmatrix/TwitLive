@@ -16,12 +16,14 @@ public partial class DownloadManager :ObservableObject, IDownload
 	public List<Show> show { get; set; }
 	IDb db { get; set; }
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(DownloadManager));
+
 	public DownloadManager(IDb db)
 	{
 		show = [];
 		this.db = db;
 		client ??= new HttpClient();
 	}
+
 	public async Task<DownloadStatus> DownloadAsync(Show show, CancellationToken token = default)
 	{
 		var file = FileService.GetFileName(show.Url);

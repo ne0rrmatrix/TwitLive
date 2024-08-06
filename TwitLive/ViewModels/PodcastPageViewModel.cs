@@ -26,11 +26,6 @@ public partial class PodcastPageViewModel : BasePageViewModel
 		IsBusy = false;
 	}
 
-	/// <summary>
-	/// A Method that passes a Url <see cref="string"/> to <see cref="ShowPage"/>
-	/// </summary>
-	/// <param name="podcast">A Url <see cref="string"/></param>
-	/// <returns></returns>
 	[RelayCommand]
 	public static async Task GotoShowPage(Podcast podcast, CancellationToken cancellationToken = default)
 	{
