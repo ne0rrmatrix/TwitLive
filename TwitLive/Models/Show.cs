@@ -15,6 +15,12 @@ public partial class Show : Shared, IDisposable
 		get => cancellationTokenSource;
 		set => SetProperty(ref cancellationTokenSource, value);
 	}
+	int position;
+	public int Position
+	{
+		get => position;
+		set => SetProperty(ref position, value);
+	}
 	string fileName = string.Empty;
 	public string FileName
 	{

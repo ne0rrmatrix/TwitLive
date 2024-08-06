@@ -1,49 +1,48 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MetroLog;
+using TwitLive.Primitives;
 using TwitLive.Services;
 
 namespace TwitLive.ViewModels;
 public partial class BasePageViewModel : ObservableObject, IDisposable
 {
-	readonly CancellationToken cancellationToken;
-	public CancellationToken CancellationToken => cancellationToken;
-	public readonly FeedService FeedService;
+	[ObservableProperty]
+	double percentagBar;
+	[ObservableProperty]
+	int orientation;
+	[ObservableProperty]
+	string percentageLabel = string.Empty;
 	[ObservableProperty]
 	bool isRefreshing;
-
-	/// <summary>
-	/// A <see cref="bool"/> instance managed by this class. 
-	/// </summary>
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsNotBusy))]
 	bool isBusy;
-
-	/// <summary>
-	/// A <see cref="bool"/> public property managed by this class.
-	/// </summary>
 	public bool IsNotBusy => !IsBusy;
-
-	/// <summary>
-	/// The <see cref="DisplayInfo"/> instance managed by this class.
-	/// </summary>
 	public DisplayInfo MyMainDisplay { get; set; }
-
-	/// <summary>
-	/// an <see cref="int"/> instance managed by this class. Used to set <see cref="Span"/> of <see cref="GridItemsLayout"/>
-	/// </summary>
-	[ObservableProperty]
-	int orientation;
+	
 	bool disposedValue;
-
+	readonly CancellationToken cancellationToken;
+	public CancellationToken CancellationToken => cancellationToken;
+	public readonly FeedService FeedService;
 	public BasePageViewModel()
 	{
 		cancellationToken = new();
 		MyMainDisplay = new();
 		FeedService = new FeedService();
-		DeviceDisplay.MainDisplayInfoChanged += DeviceDisplayMainDisplayInfoChanged;
 		Orientation = IdiomOrientation.Span;
 		OnPropertyChanged(nameof(Orientation));
+		ArgumentNullException.ThrowIfNull(App.Download);
+		App.Download.ProgressChanged += Progress_ProgressChanged;
 	}
 
+	[RelayCommand]
+	public Task SetIsBusy()
+	{
+		System.Diagnostics.Trace.TraceInformation("BasePageViewModel");
+		IsBusy = false;
+		return Task.CompletedTask;
+	}
 	/// <summary>
 	/// <c>DeviceDisplay_MainDisplayInfoChanged</c> is a method that sets <see cref="Orientation"/>
 	/// </summary>
@@ -118,6 +117,16 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		}
 	}
 
+	public void Progress_ProgressChanged(object? sender, DownloadProgressEventArgs e)
+	{
+		ArgumentNullException.ThrowIfNull(App.Download);
+		double temp = e.Percentage;
+		PercentagBar = temp/100;
+		IsBusy = true;
+		PercentageLabel = $"Percent done: {temp}%";
+		OnPropertyChanged(nameof(PercentageLabel));
+		OnPropertyChanged(nameof(IsBusy));
+	}
 	~BasePageViewModel()
 	{
 	     Dispose(disposing: false);

@@ -1,7 +1,10 @@
 ﻿using System.Web;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MetroLog;
+using TwitLive.Database;
 using TwitLive.Interfaces;
 using TwitLive.Models;
 using TwitLive.Primitives;
@@ -19,11 +22,6 @@ public partial class ShowPageViewModel : BasePageViewModel
 		set => SetProperty(ref shows, value);
 	}
 
-	double percentage = 0;
-	readonly Progress<double> progress;
-	readonly CancellationTokenSource cancellationToken;
-	
-	string? url;
 	public string? Url
 	{
 		get => url;
@@ -37,15 +35,17 @@ public partial class ShowPageViewModel : BasePageViewModel
 			});
 		}
 	}
+
+	readonly CancellationTokenSource cancellationToken;
+	string? url;
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(ShowPageViewModel));
-	public ShowPageViewModel()
+	
+	public ShowPageViewModel(IDb db)
 	{
 		shows = [];
-		progress = new();
 		cancellationToken = new();
-		progress.ProgressChanged += Progress_ProgressChanged;
+		System.Diagnostics.Trace.TraceInformation("ShowPageViewModel");
 	}
-
 	async Task LoadShows(CancellationToken cancellationToken = default)
 	{
 		if (url is null)
@@ -54,6 +54,10 @@ public partial class ShowPageViewModel : BasePageViewModel
 		}
 		ArgumentNullException.ThrowIfNull(App.Download);
 		var result = await FeedService.GetShowListAsync(url, cancellationToken).ConfigureAwait(false);
+		if(result is null)
+		{
+			return;
+		}
 		foreach (var item in App.Download.show)
 		{
 			result[result.FindIndex(x => x.Url == item.Url)] = item;
@@ -83,28 +87,36 @@ public partial class ShowPageViewModel : BasePageViewModel
 		}
 		ThreadPool.QueueUserWorkItem(async (state) =>
 		{
-			var result = await App.Download.DownloadAsync(show, progress, show.CancellationTokenSource.Token).ConfigureAwait(false);
+			var result = await App.Download.DownloadAsync(show, show.CancellationTokenSource.Token).ConfigureAwait(false);
 			GetDispatcher.Dispatcher?.Dispatch(async () =>
 			{
 				switch (result)
 				{
 					case DownloadStatus.Downloaded:
 						show.Status = DownloadStatus.Downloaded;
+						show.IsDownloading = false;
+						show.IsDownloaded = true;
+						PercentageLabel = string.Empty;
+						IsBusy = false;
 						await Shell.Current.DisplayAlert("Download", "Download Complete", "Ok").ConfigureAwait(false);
 						break;
 					case DownloadStatus.Error:
 						show.Status = DownloadStatus.Error;
+						PercentageLabel = string.Empty;
+						IsBusy = false;
+						show.IsDownloaded = false;
+						show.IsDownloading = false;
+						File.Delete(show.FileName);
 						await Shell.Current.DisplayAlert("Download", "Download Failed", "Ok").ConfigureAwait(false);
 						break;
 					case DownloadStatus.Cancelled:
+						FileService.DeleteFile(show.FileName);
+						show.IsDownloaded = false;
+						show.IsDownloading = false;
 						show.Status = DownloadStatus.Cancelled;
+						PercentageLabel = string.Empty;
+						IsBusy = false;
 						await Shell.Current.DisplayAlert("Download", "Download Cancelled", "Ok").ConfigureAwait(false);
-						break;
-					case DownloadStatus.Downloading:
-						show.Status = DownloadStatus.Downloading;
-						break;
-					case DownloadStatus.NotDownloaded:
-						show.Status = DownloadStatus.NotDownloaded;
 						break;
 				}
 			});
@@ -117,22 +129,24 @@ public partial class ShowPageViewModel : BasePageViewModel
 	/// <param name="show">A Url <see cref="string"/></param>
 	/// <returns></returns>
 	[RelayCommand]
-	public static async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
+	public async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
 	{
 		if(File.Exists(show.FileName))
 		{
 			show.Url = show.FileName;
 		}
+
 		var navigationParameter = new Dictionary<string, object>
 		{
 			{ "Show", show }
 		};
 		await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter).WaitAsync(cancellationToken).ConfigureAwait(false);
+		WeakReferenceMessenger.Default.Send(new NavigationMessage (true));
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>
 	{
-		if (Url is null)
+		if (Url is null || string.IsNullOrEmpty(url))
 		{
 			IsBusy = false;
 			IsRefreshing = false;
@@ -141,32 +155,14 @@ public partial class ShowPageViewModel : BasePageViewModel
 		Shows.Clear();
 		IsRefreshing = true;
 		IsBusy = true;
-		OnPropertyChanged(nameof(IsBusy));
-		OnPropertyChanged(nameof(IsRefreshing));
 		await LoadShows(CancellationToken.None).ConfigureAwait(false);
 		IsBusy = false;
 		IsRefreshing = false;
-		OnPropertyChanged(nameof(IsBusy));
-		OnPropertyChanged(nameof(IsRefreshing));
 	});
 
 	protected override void Dispose(bool disposing)
 	{
-		progress.ProgressChanged -= Progress_ProgressChanged;
 		cancellationToken?.Dispose();
 		base.Dispose(disposing);
-	}
-
-	void Progress_ProgressChanged(object? sender, double e)
-	{
-		ThreadPool.QueueUserWorkItem((state) =>
-		{
-			var temp = Math.Floor(e);
-			if (temp > percentage)
-			{
-				percentage = temp;
-				logger.Info($"Progress: {percentage}");
-			}
-		});
 	}
 }

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TwitLive.Views.DownloadsPage"
              xmlns:model="clr-namespace:TwitLive.Models"
+             xmlns:app="clr-namespace:TwitLive.Primitives"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
              xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
@@ -21,7 +22,22 @@
     </ContentPage.Behaviors>
      
     <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
-            <CollectionView HorizontalScrollBarVisibility="Never"
+        <Grid>
+             <Grid.RowDefinitions>
+                 <RowDefinition Height="Auto" />
+                 <RowDefinition Height="*" />
+             </Grid.RowDefinitions>
+              <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
+                  <Label Text="Download Progress"  HorizontalOptions="Center"/>
+                  <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Green" ScaleX="2" ScaleY="3" >
+                     <ProgressBar.Behaviors>
+                         <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
+                     </ProgressBar.Behaviors>
+                 </ProgressBar>
+                  <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
+              </StackLayout>
+            
+            <CollectionView Grid.Row="1" HorizontalScrollBarVisibility="Never"
                  VerticalScrollBarVisibility="Never"
                  ItemsSource="{Binding Shows}">
                 <CollectionView.ItemsLayout>
@@ -90,5 +106,6 @@
                      </DataTemplate>
                  </CollectionView.ItemTemplate>
      </CollectionView>
+            </Grid>
     </RefreshView>
 </ContentPage>

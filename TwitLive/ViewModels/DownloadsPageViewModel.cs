@@ -3,35 +3,18 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TwitLive.Interfaces;
 using TwitLive.Models;
-using TwitLive.Primitives;
 
 namespace TwitLive.ViewModels;
 public partial class DownloadsPageViewModel : BasePageViewModel
 {
+	[ObservableProperty]
 	List<Show> shows;
-	public List<Show> Shows
-	{
-		get => shows;
-		set => SetProperty(ref shows, value);
-	}
 	IDb db { get; set; }
-	IDownload download { get; set; }
-	public DownloadsPageViewModel(IDb db, IDownload download)
+	public DownloadsPageViewModel(IDb db)
 	{
 		this.db = db;
-		this.download = download;
 		shows = []; 
 		GetDispatcher.Dispatcher?.Dispatch(async () => { await GetShows(); OnPropertyChanged(nameof(Shows)); });
-		this.download.ProgressChanged += Download_ProgressChanged;
-	}
-
-	async void Download_ProgressChanged(object? sender, DownloadProgressEventArgs e)
-	{
-		if(e.Status == DownloadStatus.Downloaded)
-		{
-			Shows.Clear();
-			await GetShows().ConfigureAwait(false);
-		}
 	}
 
 	public async Task GetShows()
@@ -68,6 +51,13 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		{
 			System.Diagnostics.Trace.TraceInformation($"File {show.FileName} not found");
 		}
+		
+		var CurrentShows = await db.GetShowsAsync();
+		var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
+		if (orphanedShow is not null)
+		{
+			await db.DeleteShowAsync(orphanedShow).ConfigureAwait(false);
+		}
 		Shows.Clear();
 		await GetShows().ConfigureAwait(false);
 	}
@@ -84,9 +74,4 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		OnPropertyChanged(nameof(IsBusy));
 		OnPropertyChanged(nameof(IsRefreshing));
 	});
-	protected override void Dispose(bool disposing)
-	{
-		download.ProgressChanged -= Download_ProgressChanged;
-		base.Dispose(disposing);
-	}
 }

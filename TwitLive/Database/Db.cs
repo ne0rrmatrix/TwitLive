@@ -34,14 +34,14 @@ public class Db : IDb
 		return await db.Table<Show>().ToListAsync();
 	}
 
-	public async Task<Show> GetShowAsync(int id)
+	public async Task<Show> GetShowAsync(string title)
 	{
 		await Init();
 		if (db is null)
 		{
 			return new Show();
 		}
-		return await db.Table<Show>().Where(i => i.ID == id).FirstOrDefaultAsync();
+		return await db.Table<Show>().Where(i => i.Title == title).FirstOrDefaultAsync();
 	}
 
 	public async Task SaveShowAsync(Show show)
@@ -51,7 +51,7 @@ public class Db : IDb
 		{
 			return;
 		}
-		var item = await db.Table<Show>().Where(i => i.ID == show.ID).FirstOrDefaultAsync();
+		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync();
 		if (item is null)
 		{
 			await db.InsertAsync(show);
@@ -66,6 +66,11 @@ public class Db : IDb
 	{
 		await Init();
 		if (db is null)
+		{
+			return;
+		}
+		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync();
+		if (item is null)
 		{
 			return;
 		}

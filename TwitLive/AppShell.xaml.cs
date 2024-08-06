@@ -11,6 +11,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("//VideoPlayerPage", typeof(VideoPlayerPage));
 		Routing.RegisterRoute("//DownloadsPage", typeof(DownloadsPage));
 	}
+
 #if ANDROID
 	protected override bool OnBackButtonPressed()
 	{

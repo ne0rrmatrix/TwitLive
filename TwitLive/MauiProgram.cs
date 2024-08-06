@@ -1,16 +1,14 @@
-﻿using TwitLive.Primitives;
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
-using Microsoft.Extensions.Logging;
-using TwitLive.Interfaces;
-using TwitLive.ViewModels;
-using MetroLog.Targets;
-using TwitLive.Views;
-using TwitLive.Database;
-using MetroLog.Operators;
 using MetroLog;
+using MetroLog.Operators;
+using MetroLog.Targets;
+using TwitLive.Database;
+using TwitLive.Interfaces;
+using TwitLive.Primitives;
+using TwitLive.ViewModels;
+using TwitLive.Views;
 using LoggerFactory = MetroLog.LoggerFactory;
-using MetroLog.Maui;
 using LogLevel = MetroLog.LogLevel;
 
 
@@ -71,20 +69,20 @@ public static class MauiProgram
 
 		LoggerFactory.Initialize(config);
 		#endregion
-		builder.Services.AddTransient<PodcastPage>();
+		builder.Services.AddSingleton<PodcastPage>();
 		builder.Services.AddSingleton<PodcastPageViewModel>();
 
-		builder.Services.AddTransient<ShowPage>();
-		builder.Services.AddTransient<ShowPageViewModel>();
+		builder.Services.AddSingleton<ShowPage>();
+		builder.Services.AddSingleton<ShowPageViewModel>();
 #if WINDOWS
         builder.Services.AddSingleton<VideoPlayerPage>();
 #else
-		builder.Services.AddTransient<VideoPlayerPage>();
+		builder.Services.AddSingleton<VideoPlayerPage>();
 #endif
 		builder.Services.AddSingleton<VideoPlayerViewModel>();
 
-		builder.Services.AddTransient<DownloadsPage>();
-		builder.Services.AddTransient<DownloadsPageViewModel>();
+		builder.Services.AddSingleton<DownloadsPage>();
+		builder.Services.AddSingleton<DownloadsPageViewModel>();
 
 		builder.Services.AddSingleton<BasePageViewModel>();
 		builder.Services.AddSingleton(LogOperatorRetriever.Instance);

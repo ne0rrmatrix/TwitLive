@@ -1,5 +1,4 @@
-﻿using TwitLive.Database;
-using TwitLive.Interfaces;
+﻿using TwitLive.Interfaces;
 
 namespace TwitLive;
 public partial class App : Application
