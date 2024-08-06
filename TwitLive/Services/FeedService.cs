@@ -2,6 +2,7 @@
 using System.Xml;
 using System.Xml.Linq;
 using TwitLive.Models;
+using TwitLive.Primitives;
 
 namespace TwitLive.Services;
 
@@ -17,6 +18,7 @@ public class FeedService : IDisposable
 	{
 		httpClient = new HttpClient();
 	}
+
 	public async Task<List<Podcast>> GetPodcasts(CancellationToken cancellationToken = default)
 	{
 		var Podcasts = new List<Podcast>();
@@ -110,14 +112,13 @@ public class FeedService : IDisposable
 	/// </summary>
 	/// <param name="url">The Url of the <see cref="Show"/></param>
 	/// <returns><see cref="List{T}"/> <see cref="Show"/></returns>
-	public static async Task<List<Show>> GetShowListAsync(string url, CancellationToken cancellationToken = default)
+	public async Task<List<Show>> GetShowListAsync(string url, CancellationToken cancellationToken = default)
 	{
 		List<Show> shows = [];
 		XmlDocument rssDoc = [];
 
 		try
 		{
-			using var httpClient = new HttpClient();
 			string xmlContent = await httpClient.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
 			rssDoc.LoadXml(xmlContent);
 
@@ -150,7 +151,7 @@ public class FeedService : IDisposable
 					Url = node.SelectSingleNode("enclosure", mgr)?.Attributes?["url"]?.InnerText ?? string.Empty,
 					Image = node.SelectSingleNode("itunes:image", mgr)?.Attributes?["href"]?.InnerText ?? string.Empty,
 				};
-
+				show.FileName = FileService.GetFileName(show.Url);
 				shows.Add(show);
 			}
 

@@ -14,73 +14,89 @@
              ios:Page.UseSafeArea="True"
              x:DataType="viewModel:PodcastPageViewModel">
      <ContentPage.Behaviors>
-        <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
+        <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="DarkContent" />
     </ContentPage.Behaviors>
     <Shell.BackButtonBehavior>
         <BackButtonBehavior IsVisible="False" />
     </Shell.BackButtonBehavior>
     <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" RefreshColor="Teal" IsRefreshing="{Binding IsRefreshing}">
-    <CollectionView ItemsSource="{Binding Podcasts}"
-                    VerticalScrollBarVisibility="Never"
-                    HorizontalScrollBarVisibility="Never">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical"
-                                 Span="{Binding Orientation}" />
-                </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="model:Podcast">
-                     <Frame Background="White" 
-                            WidthRequest="400"
-                            Margin="10,0,10,0" 
-                            Padding="10" 
-                            CornerRadius="10">
-                        <Grid
-                              ColumnDefinitions="500"
-                              RowDefinitions="*, 300, 220">
-                                <Label Grid.Row="0" Text="{Binding Title}"
-                                    FontSize="Title"
-                                    TextColor="Black"
-                                    FontAttributes="Bold"
-                                    Margin="10,0,10,0" />
-                            <Image Grid.Row="1"
-                                    Aspect="AspectFit"
-                                    WidthRequest="350"
-                                    HorizontalOptions="Start"
-                                    HeightRequest="200"
-                                    Margin="10,0,10,0">
-                                <Image.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}, Path=GotoShowPageCommand}"
-                                                            CommandParameter="{Binding .}" />
-                                </Image.GestureRecognizers>
-                                <Image.Source>
-                                    <UriImageSource Uri="{Binding Image}" CachingEnabled="True"  CacheValidity="10:00:00:00" />
-                                </Image.Source>
-                            </Image>
-                            <Label Grid.Row="2" Text="{Binding Description}"
-                                    FontSize="Body"
-                                    TextColor="Black"
-                                    HorizontalOptions="Start"
-                                    WidthRequest="350"
-                                    Margin="10,0,10,0" />
-                        </Grid>
-                     </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-     <CollectionView.EmptyView>
-             <ContentView>
-                 <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
-                     <Label
-                         Padding="20"
-                         FontSize="Large"
-                         HorizontalOptions="Center"
-                         HorizontalTextAlignment="Center"
-                         Text="Loading..."
-                         TextColor="Black"
-                         VerticalOptions="Center" />
-                     <ActivityIndicator IsRunning="True" Color="Red" />
-                 </StackLayout>
-             </ContentView>
-         </CollectionView.EmptyView>
-     </CollectionView>
+         <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+             <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
+                  <Label Text="Download Progress"  HorizontalOptions="Center"/>
+                  <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Green" ScaleX="2" ScaleY="3" >
+                     <ProgressBar.Behaviors>
+                         <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
+                     </ProgressBar.Behaviors>
+                 </ProgressBar>
+                  <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
+              </StackLayout>
+     
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Podcasts}"
+                            VerticalScrollBarVisibility="Never"
+                            HorizontalScrollBarVisibility="Never">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical"
+                                            Span="{Binding Orientation}" />
+                        </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:Podcast">
+                             <Grid>
+                                <Frame Background="White" 
+                                    WidthRequest="400"
+                                    Margin="10,0,10,0" 
+                                    Padding="10" 
+                                    CornerRadius="10">
+                               <StackLayout>
+                                        <Label Text="{Binding Title}"
+                                            FontSize="Title"
+                                            TextColor="Black"
+                                            FontAttributes="Bold"
+                                            Margin="10,0,10,0" />
+                                        <Image
+                                                Aspect="AspectFit"
+                                                WidthRequest="350"
+                                                HorizontalOptions="Start"
+                                                HeightRequest="200"
+                                                Margin="10,0,10,0">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}, Path=GotoShowPageCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                        <Image.Source>
+                                            <UriImageSource Uri="{Binding Image}" CachingEnabled="True"  CacheValidity="10:00:00:00" />
+                                        </Image.Source>
+                                    </Image>
+                                    <Label Text="{Binding Description}"
+                                            FontSize="Body"
+                                            TextColor="Black"
+                                            HorizontalOptions="Start"
+                                            WidthRequest="350"
+                                            Margin="10,0,10,0" />
+                               </StackLayout>
+                                </Frame>
+                                  </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                            <ContentView>
+                                <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                                    <Label
+                                        Padding="20"
+                                        FontSize="Large"
+                                        HorizontalOptions="Center"
+                                        HorizontalTextAlignment="Center"
+                                        Text="Loading..."
+                                        TextColor="Black"
+                                        VerticalOptions="Center" />
+                                    <ActivityIndicator IsRunning="True" Color="Red" />
+                                </StackLayout>
+                            </ContentView>
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+         </Grid>
     </RefreshView>
 </ContentPage>

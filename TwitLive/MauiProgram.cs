@@ -1,8 +1,16 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
-using Microsoft.Extensions.Logging;
+using MetroLog;
+using MetroLog.Operators;
+using MetroLog.Targets;
+using TwitLive.Database;
+using TwitLive.Interfaces;
+using TwitLive.Primitives;
 using TwitLive.ViewModels;
 using TwitLive.Views;
+using LoggerFactory = MetroLog.LoggerFactory;
+using LogLevel = MetroLog.LogLevel;
+
 #if WINDOWS
 using TwitLive.Handlers;
 #endif
@@ -29,23 +37,56 @@ public static class MauiProgram
             handlers.AddHandler<RefreshView, MauiRefreshViewHandler>();
 #endif
 		});
-#if DEBUG
-		builder.Logging.AddDebug();
+		#region Logging
+		var config = new LoggingConfiguration();
+
+#if RELEASE
+        config.AddTarget(
+            LogLevel.Info,
+            LogLevel.Fatal,
+            new StreamingFileTarget(Path.Combine(
+                FileSystem.CacheDirectory,
+                "MetroLogs"), retainDays: 2));
+#else
+		// Will write logs to the Debug output
+		config.AddTarget(
+			LogLevel.Trace,
+			LogLevel.Fatal,
+			new TraceTarget());
 #endif
-		builder.Services.AddTransient<PodcastPage>();
+
+		// will write logs to the console output (Logcat for android)
+		config.AddTarget(
+			LogLevel.Info,
+			LogLevel.Fatal,
+			new ConsoleTarget());
+
+		config.AddTarget(
+			LogLevel.Info,
+			LogLevel.Fatal,
+			new MemoryTarget(2048));
+
+		LoggerFactory.Initialize(config);
+		#endregion
+		builder.Services.AddSingleton<PodcastPage>();
 		builder.Services.AddSingleton<PodcastPageViewModel>();
 
-		builder.Services.AddTransient<ShowPage>();
-		builder.Services.AddTransient<ShowPageViewModel>();
+		builder.Services.AddSingleton<ShowPage>();
+		builder.Services.AddSingleton<ShowPageViewModel>();
 #if WINDOWS
         builder.Services.AddSingleton<VideoPlayerPage>();
 #else
-		builder.Services.AddTransient<VideoPlayerPage>();
+		builder.Services.AddSingleton<VideoPlayerPage>();
 #endif
 		builder.Services.AddSingleton<VideoPlayerViewModel>();
 
-		builder.Services.AddSingleton<BasePageViewModel>();
+		builder.Services.AddSingleton<DownloadsPage>();
+		builder.Services.AddSingleton<DownloadsPageViewModel>();
 
+		builder.Services.AddSingleton<BasePageViewModel>();
+		builder.Services.AddSingleton(LogOperatorRetriever.Instance);
+		builder.Services.AddSingleton<IDownload, DownloadManager>();
+		builder.Services.AddSingleton<IDb, Db>();
 		return builder.Build();
 	}
 }

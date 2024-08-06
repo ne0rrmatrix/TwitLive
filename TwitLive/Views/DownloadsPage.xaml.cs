@@ -2,9 +2,9 @@ using TwitLive.ViewModels;
 
 namespace TwitLive.Views;
 
-public partial class ShowPage : ContentPage
+public partial class DownloadsPage : ContentPage
 {
-	public ShowPage(ShowPageViewModel viewModel)
+	public DownloadsPage(DownloadsPageViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;

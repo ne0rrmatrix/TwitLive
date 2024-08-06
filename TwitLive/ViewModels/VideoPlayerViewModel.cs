@@ -1,18 +1,20 @@
-﻿using TwitLive.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using TwitLive.Interfaces;
+using TwitLive.Models;
 
 namespace TwitLive.ViewModels;
 [QueryProperty(nameof(Show), "Show")]
 public partial class VideoPlayerViewModel : BasePageViewModel
 {
+	[ObservableProperty]
 	Show show;
-	public Show Show
-	{
-		get => show;
-		set => SetProperty(ref show, value);
-	}
 
-	public VideoPlayerViewModel()
+	[ObservableProperty]
+	IDb db;
+
+	public VideoPlayerViewModel(IDb db)
 	{
-		show ??= new Show();
+		show ??= new();
+		this.db = db;
 	}
 }

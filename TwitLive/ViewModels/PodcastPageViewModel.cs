@@ -9,7 +9,7 @@ using TwitLive.Views;
 
 namespace TwitLive.ViewModels;
 public partial class PodcastPageViewModel : BasePageViewModel
-{	
+{
 	[ObservableProperty]
 	ObservableCollection<Podcast> podcasts;
 	public PodcastPageViewModel()
@@ -19,16 +19,13 @@ public partial class PodcastPageViewModel : BasePageViewModel
 		{
 			var item = await FeedService.GetPodcasts().ConfigureAwait(false);
 			GetDispatcher.Dispatcher?.Dispatch(() => Podcasts = new ObservableCollection<Podcast>(item));
-
 		});
-
+	}
+	protected void OnAppearing()
+	{
+		IsBusy = false;
 	}
 
-	/// <summary>
-	/// A Method that passes a Url <see cref="string"/> to <see cref="ShowPage"/>
-	/// </summary>
-	/// <param name="podcast">A Url <see cref="string"/></param>
-	/// <returns></returns>
 	[RelayCommand]
 	public static async Task GotoShowPage(Podcast podcast, CancellationToken cancellationToken = default)
 	{
