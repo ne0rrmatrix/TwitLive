@@ -1,26 +1,32 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using MetroLog;
 using TwitLive.Interfaces;
 using TwitLive.Models;
 
 namespace TwitLive.Primitives;
-public partial class DownloadManager :ObservableObject, IDownload
+public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 {
 	[ObservableProperty]
 	string percentageLabel = string.Empty;
 	[ObservableProperty]
 	double percentage;
 	readonly HttpClient? client;
+#pragma warning disable IDE0044
+	CancellationTokenSource cancellationToken;
+	bool disposedValue;
+
 	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
 	protected virtual void OnProgressChanged(DownloadProgressEventArgs e) => ProgressChanged?.Invoke(this, e);
-	public List<Show> show { get; set; }
+	public List<Show> shows { get; set; }
 	IDb db { get; set; }
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(DownloadManager));
 
 	public DownloadManager(IDb db)
 	{
-		show = [];
+		shows = [];
 		this.db = db;
+		cancellationToken = new();
 		client ??= new HttpClient();
 	}
 
@@ -32,23 +38,25 @@ public partial class DownloadManager :ObservableObject, IDownload
 		show.IsDownloaded = !show.IsDownloaded;
 		show.IsDownloading = !show.IsDownloading;
 		show.Status = DownloadStatus.Downloading;
-		this.show.Add(show);
-		
 		var url = show.Url;
 
 		try
 		{
 			FileService.DeleteFile(url);
-			var CurrentShows = await db.GetShowsAsync();
+			var CurrentShows = await db.GetShowsAsync(cancellationToken.Token);
 			var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
 			if (orphanedShow is not null)
 			{
-				await db.DeleteShowAsync(orphanedShow).ConfigureAwait(false);
+				await db.DeleteShowAsync(orphanedShow, cancellationToken.Token).ConfigureAwait(false);
 			}
 			var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
 			if (!response.IsSuccessStatusCode)
 			{
 				logger.Info($"Error downloading file: {response.StatusCode}");
+				this.shows.Remove(show);
+				Percentage = 0;
+				PercentageLabel = string.Empty;
+				this.shows.Clear();
 				OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Error, 0));
 				return DownloadStatus.Error;
 			}
@@ -65,7 +73,8 @@ public partial class DownloadManager :ObservableObject, IDownload
 				{
 					logger.Info("Download cancelled");
 					output.Close();
-					this.show.Remove(show);
+					this.shows.Remove(show);
+					this.shows.Clear();
 					Percentage = 0;
 					PercentageLabel = string.Empty;
 					OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Cancelled, 0));
@@ -94,22 +103,45 @@ public partial class DownloadManager :ObservableObject, IDownload
 				}
 			} while (isMoreToRead);
 			output.Close();
-			await db.SaveShowAsync(show).ConfigureAwait(false);
-			this.show.Remove(show);
+			await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
+			this.shows.Remove(show);
+			Percentage = 0;
+			PercentageLabel = string.Empty;
 			logger.Info("Download complete");
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Downloaded, Percentage));
-
 		}
 		catch (Exception ex)
 		{
 			logger.Info($"Error downloading file: {ex.Message}");
-			this.show.Remove(show);
+			this.shows.Remove(show);
 			Percentage = 0;
 			PercentageLabel = string.Empty;
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Error, 0));
+			this.shows.Clear();
 			return DownloadStatus.Error;
 		}
 		return DownloadStatus.Downloaded;
+	}
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				WeakReferenceMessenger.Default.Unregister<NavigationMessage>(this);
+				cancellationToken?.Dispose();
+				client?.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
 	}
 }
 

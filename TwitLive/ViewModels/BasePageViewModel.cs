@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TwitLive.Primitives;
 using TwitLive.Services;
@@ -107,6 +107,11 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		{
 			if (disposing)
 			{
+				if(App.Download is not null)
+				{
+					App.Download.ProgressChanged -= Progress_ProgressChanged;
+				}
+
 				DeviceDisplay.MainDisplayInfoChanged -= DeviceDisplayMainDisplayInfoChanged;
 				FeedService.Dispose();
 			}
@@ -117,17 +122,20 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 	public void Progress_ProgressChanged(object? sender, DownloadProgressEventArgs e)
 	{
 		ArgumentNullException.ThrowIfNull(App.Download);
-		double temp = e.Percentage;
-		PercentagBar = temp/100;
-		IsBusy = true;
-		PercentageLabel = $"Percent done: {temp}%";
-		OnPropertyChanged(nameof(PercentageLabel));
-		OnPropertyChanged(nameof(IsBusy));
+		GetDispatcher.Dispatcher?.Dispatch(() => 
+		{ 
+			double temp = e.Percentage;
+			PercentagBar = temp/100;
+			IsBusy = true;
+			PercentageLabel = $"Percent done: {temp}%";
+			OnPropertyChanged(nameof(PercentageLabel));
+			OnPropertyChanged(nameof(IsBusy));
+		});
 	}
 
 	~BasePageViewModel()
 	{
-	     Dispose(disposing: false);
+		Dispose(disposing: false);
 	}
 
 	public void Dispose()

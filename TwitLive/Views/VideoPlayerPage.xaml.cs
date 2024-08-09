@@ -20,11 +20,17 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage());
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
 	}
 	
-	public void HandleMessage()
+	public void HandleMessage(NavigationMessage message)
 	{
+		if (!message.Value || message.Status is not null)
+		{
+			System.Diagnostics.Debug.WriteLine("Not stopping timer. Exiting message handler in video player");
+			return;
+		}
+		System.Diagnostics.Debug.WriteLine("Stopping timer in video player");
 		StopTimer();
 		mediaElement.MediaOpened -= MediaElement_MediaOpened;
 		if (BindingContext is not VideoPlayerViewModel currentShow)
@@ -33,9 +39,10 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 			item = null;
 			return;
 		}
-		mediaElement.MediaOpened += MediaElement_MediaOpened;
+
 		show = currentShow.Show;
 		item = currentShow.Db;
+		mediaElement.MediaOpened += MediaElement_MediaOpened;
 	}
 	
 	async void MediaElement_MediaOpened(object? sender, EventArgs e)
@@ -46,11 +53,11 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		if (result is null)
 		{
 			StartTimer();
-			System.Diagnostics.Debug.WriteLine("Position not found");
+			System.Diagnostics.Debug.WriteLine("Previous position not found");
 		}
 		else if (result.Position is > 0)
 		{
-			System.Diagnostics.Debug.WriteLine($"Position loaded: {result.Position}");
+			System.Diagnostics.Debug.WriteLine($"Loading previous position: {result.Position}");
 			await MainThread.InvokeOnMainThreadAsync(async () => 
 			{
 				await mediaElement.SeekTo(TimeSpan.FromSeconds(result.Position)).ConfigureAwait(true); 
@@ -61,7 +68,9 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	
 	async void UpdatePlayedTime(object? sender, ElapsedEventArgs e)
 	{
-		if (item is not null && show is not null && !string.IsNullOrEmpty(show.Title))
+		ArgumentNullException.ThrowIfNull(show);
+		ArgumentNullException.ThrowIfNull(item);
+		if (!string.IsNullOrEmpty(show.Title))
 		{
 			show.Position = (int)mediaElement.Position.TotalSeconds;
 			await item.SaveShowAsync(show);
@@ -69,7 +78,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		}
 		else
 		{
-			System.Diagnostics.Debug.WriteLine("Item or Show is null");
+			System.Diagnostics.Debug.WriteLine("Show title is empty");
 		}
 	}
 
