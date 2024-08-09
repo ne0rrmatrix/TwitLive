@@ -1,4 +1,4 @@
-﻿using TwitLive.Models;
+using TwitLive.Models;
 using TwitLive.Primitives;
 
 namespace TwitLive.Interfaces;

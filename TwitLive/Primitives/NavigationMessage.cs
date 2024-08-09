@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging.Messages;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 
 namespace TwitLive.Primitives;
 public class NavigationMessage : ValueChangedMessage<bool>

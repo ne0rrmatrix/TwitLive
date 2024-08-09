@@ -1,4 +1,4 @@
-﻿using MetroLog;
+using MetroLog;
 using SQLite;
 using TwitLive.Interfaces;
 using TwitLive.Models;

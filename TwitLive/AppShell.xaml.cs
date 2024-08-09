@@ -20,6 +20,7 @@ public partial class AppShell : Shell
 		System.Diagnostics.Debug.WriteLine($"Navigated to {args.Current.Location}");
 		base.OnNavigated(args);
 	}
+
 #if ANDROID
 	protected override bool OnBackButtonPressed()
 	{

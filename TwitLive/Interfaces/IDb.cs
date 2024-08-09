@@ -1,4 +1,4 @@
-﻿using TwitLive.Models;
+using TwitLive.Models;
 
 namespace TwitLive.Interfaces;
 public interface IDb

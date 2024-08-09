@@ -1,4 +1,4 @@
-﻿using System.Web;
+using System.Web;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
