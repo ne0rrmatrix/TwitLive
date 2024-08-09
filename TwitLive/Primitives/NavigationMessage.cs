@@ -3,7 +3,11 @@
 namespace TwitLive.Primitives;
 public class NavigationMessage : ValueChangedMessage<bool>
 {
-	public NavigationMessage(bool value) : base(value)
+	readonly DownloadStatus? status;
+	public DownloadStatus? Status => status;
+	public bool value => Value;
+	public NavigationMessage(bool value, DownloadStatus? status) : base(value)
 	{
+		this.status = status;
 	}
 }

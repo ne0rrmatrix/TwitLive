@@ -15,7 +15,7 @@ public class Db : IDb
 	{
 	}
 
-	public async Task Init()
+	public async Task Init(CancellationToken cancellationToken = default)
 	{
 		if (db is not null)
 		{
@@ -23,80 +23,80 @@ public class Db : IDb
 		}
 		db = new SQLiteAsyncConnection(DbPath, Flags);
 		logger.Info("Database created");
-		await db.CreateTableAsync<Show>();
+		await db.CreateTableAsync<Show>().WaitAsync(cancellationToken).ConfigureAwait(false);
 		logger.Info("Table created");
 	}
 	
-	public async Task<List<Show>> GetShowsAsync()
+	public async Task<List<Show>> GetShowsAsync(CancellationToken cancellationToken = default)
 	{
-		await Init();
+		await Init(cancellationToken);
 		if (db is null)
 		{
 			return [];
 		}
-		return await db.Table<Show>().ToListAsync();
+		return await db.Table<Show>().ToListAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public async Task<Show> GetShowAsync(string title)
+	public async Task<Show> GetShowAsync(string title, CancellationToken cancellationToken = default)
 	{
-		await Init();
+		await Init(cancellationToken).ConfigureAwait(false);
 		if (db is null)
 		{
 			return new Show();
 		}
-		return await db.Table<Show>().Where(i => i.Title == title).FirstOrDefaultAsync();
+		return await db.Table<Show>().Where(i => i.Title == title).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public async Task SaveShowAsync(Show show)
+	public async Task SaveShowAsync(Show show, CancellationToken cancellationToken = default)
 	{
-		await Init();
+		await Init(cancellationToken);
 		if (db is null)
 		{
 			return;
 		}
-		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync();
+		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 		if (item is null)
 		{
-			await db.InsertAsync(show);
+			await db.InsertAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
 		}
 		else
 		{
-			await db.UpdateAsync(show);
+			await db.UpdateAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
 		}
 	}
 
-	public async Task DeleteShowAsync(Show show)
+	public async Task DeleteShowAsync(Show show, CancellationToken cancellationToken = default)
 	{
-		await Init();
+		await Init(cancellationToken).ConfigureAwait(false);
 		if (db is null)
 		{
 			return;
 		}
-		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync();
+		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 		if (item is null)
 		{
 			return;
 		}
-		await db.DeleteAsync(show);
+		await db.DeleteAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public async Task DeleteAllShows()
+	public async Task DeleteAllShows(CancellationToken cancellationToken = default)
 	{
-		await Init();
+		await Init(cancellationToken).ConfigureAwait(false);
 		if (db is null)
 		{
 			return;
 		}
-		await db.DeleteAllAsync<Show>();
+		await db.DeleteAllAsync<Show>().WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public async Task SaveAllShowsAsync(List<Show> shows)
+	public async Task SaveAllShowsAsync(List<Show> shows, CancellationToken cancellationToken = default)
 	{
-		await Init();
+		await Init(cancellationToken);
 		if (db is null)
 		{
 			return;
 		}
-		await db.InsertAllAsync(shows);
+		await db.InsertAllAsync(shows).WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 }

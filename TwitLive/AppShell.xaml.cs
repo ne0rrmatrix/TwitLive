@@ -1,4 +1,6 @@
-﻿using TwitLive.Views;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using TwitLive.Primitives;
+using TwitLive.Views;
 
 namespace TwitLive;
 public partial class AppShell : Shell
@@ -12,6 +14,12 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("//DownloadsPage", typeof(DownloadsPage));
 	}
 
+	protected override void OnNavigated(ShellNavigatedEventArgs args)
+	{
+		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, null));
+		System.Diagnostics.Debug.WriteLine($"Navigated to {args.Current.Location}");
+		base.OnNavigated(args);
+	}
 #if ANDROID
 	protected override bool OnBackButtonPressed()
 	{

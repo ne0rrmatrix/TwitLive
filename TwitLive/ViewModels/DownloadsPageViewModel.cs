@@ -1,8 +1,10 @@
 ﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using TwitLive.Interfaces;
 using TwitLive.Models;
+using TwitLive.Primitives;
 
 namespace TwitLive.ViewModels;
 public partial class DownloadsPageViewModel : BasePageViewModel
@@ -10,17 +12,44 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	[ObservableProperty]
 	List<Show> shows;
 	IDb db { get; set; }
+#pragma warning disable IDE0044
+	CancellationTokenSource cancellationToken;
+#pragma warning restore IDE0044
 
 	public DownloadsPageViewModel(IDb db)
 	{
 		this.db = db;
 		shows = []; 
-		GetDispatcher.Dispatcher?.Dispatch(async () => { await GetShows(); OnPropertyChanged(nameof(Shows)); });
+		cancellationToken = new();
+		GetDispatcher.Dispatcher?.Dispatch(async () => { await GetShows(cancellationToken.Token).ConfigureAwait(false); OnPropertyChanged(nameof(Shows)); });
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
 	}
 
-	public async Task GetShows()
+	void HandleMessage(NavigationMessage message)
 	{
-		var downloads = await db.GetShowsAsync().ConfigureAwait(false);
+		ArgumentNullException.ThrowIfNull(App.Download);
+
+		if (App.Download.shows.Count == 0 || !message.Value)
+		{
+			GetDispatcher.Dispatcher?.Dispatch(() =>
+			{
+				System.Diagnostics.Debug.WriteLine("Clearing Download Message");
+				PercentageLabel = string.Empty;
+				IsBusy = false;
+			});
+		}
+		else if (message.Value)
+		{
+			GetDispatcher.Dispatcher?.Dispatch(() =>
+			{
+				PullToRefreshCommand.Execute(this);
+			});
+		}
+	}
+
+	public async Task GetShows(CancellationToken cancellationToken = default)
+	{
+		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
 		GetDispatcher.Dispatcher?.Dispatch(() => Shows = downloads);
 		OnPropertyChanged(nameof(Shows));
 	}
@@ -60,7 +89,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 			await db.DeleteShowAsync(orphanedShow).ConfigureAwait(false);
 		}
 		Shows.Clear();
-		await GetShows().ConfigureAwait(false);
+		await GetShows(cancellationToken.Token).ConfigureAwait(false);
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>
@@ -70,10 +99,18 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		IsBusy = true;
 		OnPropertyChanged(nameof(IsBusy));
 		OnPropertyChanged(nameof(IsRefreshing));
-		await GetShows().ConfigureAwait(false);
+		await GetShows(cancellationToken.Token).ConfigureAwait(false);
 		IsBusy = false;
 		IsRefreshing = false;
 		OnPropertyChanged(nameof(IsBusy));
 		OnPropertyChanged(nameof(IsRefreshing));
 	});
+
+	protected override void Dispose(bool disposing)
+	{
+
+		WeakReferenceMessenger.Default.Unregister<NavigationMessage>(this);
+		cancellationToken?.Dispose();
+		base.Dispose(disposing);
+	}
 }
