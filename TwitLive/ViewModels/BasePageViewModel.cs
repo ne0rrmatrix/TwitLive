@@ -35,14 +35,6 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		App.Download.ProgressChanged += Progress_ProgressChanged;
 	}
 
-	[RelayCommand]
-	public Task SetIsBusy()
-	{
-		System.Diagnostics.Trace.TraceInformation("BasePageViewModel");
-		IsBusy = false;
-		return Task.CompletedTask;
-	}
-
 	public void DeviceDisplayMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
 	{
 		MyMainDisplay = DeviceDisplay.Current.MainDisplayInfo;
@@ -126,10 +118,8 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		{ 
 			double temp = e.Percentage;
 			PercentagBar = temp/100;
-			IsBusy = true;
+			IsBusy = e.IsBusy;
 			PercentageLabel = $"Percent done: {temp}%";
-			OnPropertyChanged(nameof(PercentageLabel));
-			OnPropertyChanged(nameof(IsBusy));
 		});
 	}
 

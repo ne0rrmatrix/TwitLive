@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -10,7 +11,7 @@ namespace TwitLive.ViewModels;
 public partial class DownloadsPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
-	List<Show> shows;
+	ObservableCollection<Show> shows;
 	IDb db { get; set; }
 #pragma warning disable IDE0044
 	CancellationTokenSource cancellationToken;
@@ -50,7 +51,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	public async Task GetShows(CancellationToken cancellationToken = default)
 	{
 		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
-		GetDispatcher.Dispatcher?.Dispatch(() => Shows = downloads);
+		GetDispatcher.Dispatcher?.Dispatch(() => Shows = new ObservableCollection<Show>(downloads));
 		OnPropertyChanged(nameof(Shows));
 	}
 
