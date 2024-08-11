@@ -15,7 +15,6 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 
 	Show? show;
 	IDb? item;
-
 	public VideoPlayerPage(VideoPlayerViewModel viewModel)
 	{
 		InitializeComponent();
