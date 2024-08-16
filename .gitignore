@@ -362,3 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /key.keystore
+/TwitLive/TwitLive.keystore
+/TwitLive/TwitLive.keystore
+*.keystore
+/TwitLive.keystore
+*.keystore

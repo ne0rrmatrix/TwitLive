@@ -35,32 +35,9 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 		var file = FileService.GetFileName(show.Url);
 		ArgumentNullException.ThrowIfNull(file);
 		ArgumentNullException.ThrowIfNull(client);
-		show.IsDownloaded = !show.IsDownloaded;
-		show.IsDownloading = !show.IsDownloading;
-		show.Status = DownloadStatus.Downloading;
-		var url = show.Url;
-
 		try
 		{
-			FileService.DeleteFile(url);
-			var CurrentShows = await db.GetShowsAsync(cancellationToken.Token);
-			var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
-			if (orphanedShow is not null)
-			{
-				await db.DeleteShowAsync(orphanedShow, cancellationToken.Token).ConfigureAwait(false);
-			}
-			var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-			if (!response.IsSuccessStatusCode)
-			{
-				logger.Info($"Error downloading file: {response.StatusCode}");
-				this.shows.Remove(show);
-				Percentage = 0;
-				PercentageLabel = string.Empty;
-				this.shows.Clear();
-				OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Error, 0));
-				return DownloadStatus.Error;
-			}
-
+			var response = await client.GetAsync(show.Url, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
 			var total = response.Content.Headers.ContentLength ?? -1L;
 			using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
 			using var output = new FileStream(show.FileName, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
@@ -71,14 +48,8 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 			{
 				if(token.IsCancellationRequested)
 				{
-					logger.Info("Download cancelled");
+					logger.Info("Closing output");
 					output.Close();
-					this.shows.Remove(show);
-					this.shows.Clear();
-					Percentage = 0;
-					PercentageLabel = string.Empty;
-					OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Cancelled, 0));
-					return DownloadStatus.Cancelled;
 				}
 				var read = await stream.ReadAsync(buffer, token).ConfigureAwait(false);
 				if (read == 0)
@@ -102,23 +73,27 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 					}
 				}
 			} while (isMoreToRead);
+
 			output.Close();
-			await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
 			this.shows.Remove(show);
 			Percentage = 0;
 			PercentageLabel = string.Empty;
 			logger.Info("Download complete");
+			
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Downloaded, Percentage));
 		}
-		catch (Exception ex)
+		catch
 		{
-			logger.Info($"Error downloading file: {ex.Message}");
-			this.shows.Remove(show);
+			var item = shows.Find(x => x.Url == show.Url);
+			if (item is not null)
+			{
+				logger.Info("Removing show from current downloads list");
+				shows.Remove(item);
+				OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Cancelled, 0));
+			}
 			Percentage = 0;
 			PercentageLabel = string.Empty;
-			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Error, 0));
-			this.shows.Clear();
-			return DownloadStatus.Error;
+			return DownloadStatus.Cancelled;
 		}
 		return DownloadStatus.Downloaded;
 	}

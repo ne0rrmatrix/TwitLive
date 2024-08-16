@@ -24,7 +24,11 @@ public static class MauiProgram
 		builder
 			.UseMauiCommunityToolkitMediaElement()
 			.UseMauiCommunityToolkitCore()
-			.UseMauiCommunityToolkit()
+			.UseMauiCommunityToolkit(options =>
+			{
+				options.SetShouldEnableSnackbarOnWindows(true);
+				options.SetShouldSuppressExceptionsInBehaviors(true);
+			})
 			.UseMauiApp<App>().ConfigureFonts(fonts =>
 		{
 			fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

@@ -15,7 +15,6 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 
 	Show? show;
 	IDb? item;
-
 	public VideoPlayerPage(VideoPlayerViewModel viewModel)
 	{
 		InitializeComponent();
@@ -23,14 +22,14 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
 	}
 	
-	public void HandleMessage(NavigationMessage message)
+	void HandleMessage(NavigationMessage message)
 	{
-		if (!message.Value || message.Status is not null)
+		if (message.Status is not null)
 		{
-			System.Diagnostics.Debug.WriteLine("Not stopping timer. Exiting message handler in video player");
+			System.Diagnostics.Debug.WriteLine("Did not navigate to video player. Not resetting videoplayer timer.");
 			return;
 		}
-		System.Diagnostics.Debug.WriteLine("Stopping timer in video player");
+		System.Diagnostics.Debug.WriteLine("Resetting timer in video player");
 		StopTimer();
 		mediaElement.MediaOpened -= MediaElement_MediaOpened;
 		if (BindingContext is not VideoPlayerViewModel currentShow)
@@ -82,7 +81,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		}
 	}
 
-	void Webview_Navigating(System.Object sender, Microsoft.Maui.Controls.WebNavigatingEventArgs e)
+	static void Webview_Navigating(System.Object sender, Microsoft.Maui.Controls.WebNavigatingEventArgs e)
 	{
 		if (e.Url.Contains("https://") || e.Url.Contains("http://"))
 		{
@@ -90,7 +89,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		}
 	}
 
-	public void StartTimer()
+	void StartTimer()
 	{
 		if (timer is not null)
 		{
@@ -102,7 +101,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		timer.Start();
 	}
 
-	public void StopTimer()
+	void StopTimer()
 	{
 		if (timer is not null)
 		{

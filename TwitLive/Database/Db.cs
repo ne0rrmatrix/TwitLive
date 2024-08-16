@@ -55,18 +55,21 @@ public class Db : IDb
 			return;
 		}
 		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
-		if (item is null)
+		if (item is not null)
 		{
+			await db.DeleteAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
 			await db.InsertAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
+			return;
 		}
-		else
-		{
-			await db.UpdateAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
-		}
+		await db.InsertAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public async Task DeleteShowAsync(Show show, CancellationToken cancellationToken = default)
+	public async Task DeleteShowAsync(Show? show, CancellationToken cancellationToken = default)
 	{
+		if (show is null)
+		{
+			return;
+		}
 		await Init(cancellationToken).ConfigureAwait(false);
 		if (db is null)
 		{

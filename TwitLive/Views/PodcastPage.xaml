@@ -25,9 +25,9 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-             <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
+             <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="310">
                   <Label Text="Download Progress"  HorizontalOptions="Center"/>
-                  <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Green" ScaleX="2" ScaleY="3" >
+                  <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Blue" ScaleX="2" ScaleY="3" >
                      <ProgressBar.Behaviors>
                          <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
                      </ProgressBar.Behaviors>
@@ -46,7 +46,7 @@
                         <DataTemplate x:DataType="model:Podcast">
                              <Grid>
                                 <Frame Background="White" 
-                                    WidthRequest="400"
+                                    WidthRequest="300"
                                     Margin="10,0,10,0" 
                                     Padding="10" 
                                     CornerRadius="10">
@@ -58,7 +58,7 @@
                                             Margin="10,0,10,0" />
                                         <Image
                                                 Aspect="AspectFit"
-                                                WidthRequest="350"
+                                                WidthRequest="250"
                                                 HorizontalOptions="Start"
                                                 HeightRequest="200"
                                                 Margin="10,0,10,0">
@@ -74,7 +74,7 @@
                                             FontSize="Body"
                                             TextColor="Black"
                                             HorizontalOptions="Start"
-                                            WidthRequest="350"
+                                            WidthRequest="250"
                                             Margin="10,0,10,0" />
                                </StackLayout>
                                 </Frame>

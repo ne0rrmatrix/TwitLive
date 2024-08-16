@@ -88,6 +88,12 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 				{
 					return 2;
 				}
+				if((int)DeviceDisplay.Current.MainDisplayInfo.Width <= 1920
+					&& (int)DeviceDisplay.Current.MainDisplayInfo.Width != 0
+					&& DeviceInfo.Current.Platform == DevicePlatform.Android && DeviceInfo.Idiom != DeviceIdiom.Phone)
+				{
+					return 2;
+				}
 				if (Idiom == DeviceIdiom.Phone)
 				{
 					return Orientation == DisplayOrientation.Portrait ? 1 : 2;
