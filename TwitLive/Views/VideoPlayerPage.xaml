@@ -15,54 +15,56 @@
         <toolkit:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
     </ContentPage.Behaviors>
     <Grid>
-           <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
-              <Label Text="Download Progress"  HorizontalOptions="Center"/>
-              <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Green" ScaleX="2" ScaleY="3" >
-                 <ProgressBar.Behaviors>
-                     <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
-                 </ProgressBar.Behaviors>
-             </ProgressBar>
-              <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
-          </StackLayout>
-      <StackLayout>
-                    <toolkit:MediaElement 
-                            HorizontalOptions="Center"
-                            Margin="10,10,10,10" 
-                            x:Name="mediaElement"
-                            MetadataArtist="{Binding Show.PubDate}"
-                            MetadataTitle="{Binding Show.Title}"
-                            MetadataArtworkUrl="{Binding Show.Image}"
-                            WidthRequest="{OnIdiom Phone=320, Default=640}" 
-                            HeightRequest="{OnIdiom Phone=240, Default=320}" 
-                            Source="{Binding Show.Url}" 
-                            ShouldAutoPlay="True" 
-                            ShouldKeepScreenOn="True" />
-                     <Frame Background="White" 
-                            WidthRequest="{OnIdiom Phone=320, Default=640}"
-                            HorizontalOptions="Center"
-                            Margin="10,10,10,10" 
-                            Padding="10" 
-                            CornerRadius="10">
-                             <StackLayout>                                         
-                                  <Label 
-                                      Margin="10,0,10,0"
-                                      HorizontalOptions="Center"
-                                      Text="{Binding Show.Title}" 
-                                      TextColor="Black" 
-                                      FontSize="Title" 
-                                      FontAttributes="Bold" />
-                                 <WebView 
-                                     Margin="10,0,10,0"
-                                     WidthRequest="{OnIdiom Phone=310, Default=630}" 
-                                     HeightRequest="2000"
-                                     Navigating="Webview_Navigating"
-                                     x:Name="webview">
-                                     <WebView.Source>
-                                         <HtmlWebViewSource Html="{Binding Show.Description}" />
-                                     </WebView.Source>
-                                 </WebView>
-                             </StackLayout>
-                         </Frame>
-                 </StackLayout>
-      </Grid>
+        <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
+            <Label Text="Download Progress"  HorizontalOptions="Center"/>
+            <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Blue" ScaleX="2" ScaleY="3" >
+                <ProgressBar.Behaviors>
+                    <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
+                </ProgressBar.Behaviors>
+            </ProgressBar>
+            <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
+        </StackLayout>
+          <ScrollView>
+            <StackLayout>
+                <toolkit:MediaElement 
+                        HorizontalOptions="Center"
+                        Margin="10,10,10,10" 
+                        x:Name="mediaElement"
+                        MetadataArtist="{Binding Show.PubDate}"
+                        MetadataTitle="{Binding Show.Title}"
+                        MetadataArtworkUrl="{Binding Show.Image}"
+                        WidthRequest="{OnIdiom Phone=320, Default=640}" 
+                        HeightRequest="{OnIdiom Phone=240, Default=320}" 
+                        Source="{Binding Show.Url}" 
+                        ShouldAutoPlay="True" 
+                        ShouldKeepScreenOn="True" />
+                    <Frame Background="White" 
+                        WidthRequest="{OnIdiom Phone=320, Default=640}"
+                        HorizontalOptions="Center"
+                        Margin="10,10,10,10" 
+                        Padding="10" 
+                        CornerRadius="10">
+                            <StackLayout>                                         
+                                <Label 
+                                    Margin="10,10,10,10"
+                                    HorizontalOptions="Center"
+                                    Text="{Binding Show.Title}" 
+                                    TextColor="Black" 
+                                    FontSize="Title" 
+                                    FontAttributes="Bold" />
+                                <WebView 
+                                    Margin="10,10,10,10"
+                                    WidthRequest="{OnIdiom Phone=310, Default=630}" 
+                                    HeightRequest="2000"
+                                    Navigating="Webview_Navigating"
+                                    x:Name="webview">
+                                    <WebView.Source>
+                                        <HtmlWebViewSource Html="{Binding Show.Description}" />
+                                    </WebView.Source>
+                                </WebView>
+                            </StackLayout>
+                    </Frame>
+            </StackLayout>
+          </ScrollView>
+    </Grid>
 </ContentPage>

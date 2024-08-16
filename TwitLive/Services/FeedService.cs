@@ -112,8 +112,12 @@ public class FeedService : IDisposable
 	/// </summary>
 	/// <param name="url">The Url of the <see cref="Show"/></param>
 	/// <returns><see cref="List{T}"/> <see cref="Show"/></returns>
-	public async Task<List<Show>> GetShowListAsync(string url, CancellationToken cancellationToken = default)
+	public async Task<List<Show>> GetShowListAsync(string? url, CancellationToken cancellationToken = default)
 	{
+		if(string.IsNullOrEmpty(url))
+		{
+			return [];
+		}
 		List<Show> shows = [];
 		XmlDocument rssDoc = [];
 

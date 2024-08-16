@@ -24,12 +24,12 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	
 	public void HandleMessage(NavigationMessage message)
 	{
-		if (!message.Value || message.Status is not null)
+		if (message.Status is not null)
 		{
-			System.Diagnostics.Debug.WriteLine("Not stopping timer. Exiting message handler in video player");
+			System.Diagnostics.Debug.WriteLine("Did not navigate to video player. Not resetting videoplayer timer.");
 			return;
 		}
-		System.Diagnostics.Debug.WriteLine("Stopping timer in video player");
+		System.Diagnostics.Debug.WriteLine("Resetting timer in video player");
 		StopTimer();
 		mediaElement.MediaOpened -= MediaElement_MediaOpened;
 		if (BindingContext is not VideoPlayerViewModel currentShow)

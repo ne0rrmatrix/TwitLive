@@ -16,7 +16,7 @@ public partial class AppShell : Shell
 
 	protected override void OnNavigated(ShellNavigatedEventArgs args)
 	{
-		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, null));
+		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, null, null));
 		System.Diagnostics.Debug.WriteLine($"Navigated to {args.Current.Location}");
 		base.OnNavigated(args);
 	}

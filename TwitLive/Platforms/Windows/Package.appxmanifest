@@ -5,7 +5,9 @@
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
-  IgnorableNamespaces="uap rescap uap3">
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  IgnorableNamespaces="uap rescap uap3 com desktop">
 
   <Identity Name="TwitPodcasts" Publisher="CN=User Name" Version="0.0.1.0" />
 
@@ -40,6 +42,23 @@
           <uap:Rotation Preference="landscape"/></uap:InitialRotationPreference>
         <uap:LockScreen Notification="badgeAndTileText" BadgeLogo="Resources\BadgeLogo\BadgeLogo.png"/>
       </uap:VisualElements>
+        <Extensions>
+
+            <!-- Specify which CLSID to activate when notification is clicked -->
+            <desktop:Extension Category="windows.toastNotificationActivation">
+                <desktop:ToastNotificationActivation ToastActivatorCLSID="DC569483-91F7-40E6-B7F4-D59AFB517FC9" />
+            </desktop:Extension>
+
+            <!-- Register COM CLSID -->
+            <com:Extension Category="windows.comServer">
+                <com:ComServer>
+                    <com:ExeServer Executable="TwitLive\TwitLive.exe" DisplayName="$targetnametoken$" Arguments="----AppNotificationActivated:">
+                        <!-- Example path to executable: CommunityToolkit.Maui.Sample\CommunityToolkit.Maui.Sample.exe -->
+                        <com:Class Id="DC569483-91F7-40E6-B7F4-D59AFB517FC9" />
+                    </com:ExeServer>
+                </com:ComServer>
+            </com:Extension>
+            </Extensions>
     </Application>
   </Applications>
 

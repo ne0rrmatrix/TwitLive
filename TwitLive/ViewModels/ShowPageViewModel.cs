@@ -1,8 +1,11 @@
 using System.Web;
 using System.Windows.Input;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MetroLog;
+using TwitLive.Interfaces;
 using TwitLive.Models;
 using TwitLive.Primitives;
 using TwitLive.Services;
@@ -11,6 +14,11 @@ namespace TwitLive.ViewModels;
 [QueryProperty("Url", "Url")]
 public partial class ShowPageViewModel : BasePageViewModel
 {
+#pragma warning disable IDE0044
+	CancellationTokenSource cancellationTokenSource;
+	CancellationTokenSource cancellationToken;
+#pragma warning restore IDE0044
+
 	List<Show> shows;
 	public List<Show> Shows
 	{
@@ -32,88 +40,102 @@ public partial class ShowPageViewModel : BasePageViewModel
 		}
 	}
 
-#pragma warning disable IDE0044
-	CancellationTokenSource cancellationToken;
-#pragma warning restore IDE0044
 	string? url;
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(ShowPageViewModel));
-	
-	public ShowPageViewModel()
+	readonly IDb db;
+
+	public ShowPageViewModel(IDb db)
 	{
+		this.db = db;
 		shows = [];
+		cancellationTokenSource = new();
 		cancellationToken = new();
 		System.Diagnostics.Trace.TraceInformation("ShowPageViewModel");
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage(m));
 	}
 
-	void HandleMessage(NavigationMessage message)
+	async Task HandleMessage(NavigationMessage m)
 	{
-		ArgumentNullException.ThrowIfNull(App.Download);
-		if (message.Status is null)
+		if(!m.Value)
 		{
-			return;
-		}
-		if(!message.Value)
-		{
-			App.Download.shows.Clear();
-			return;
-		}
-		if (App.Download.shows.Count == 0)
-		{
-			GetDispatcher.Dispatcher?.Dispatch(() =>
+			var showDB = await db.GetShowsAsync(CancellationToken.None).ConfigureAwait(false) ?? [];
+			showDB.ForEach(x =>
 			{
-				System.Diagnostics.Debug.WriteLine("Clearing Download Message");
-				PercentageLabel = string.Empty;
-				IsBusy = false;
+				var item = Shows.Find(y => y.Url == x.Url) ?? new();
+				item.IsDownloaded = x.IsDownloaded;
+				item.IsDownloading = x.IsDownloading;
 			});
-
+			foreach (var show in Shows)
+			{
+				var temp = showDB.Find(x => x.Url == show.Url) ?? new();
+				temp.IsDownloaded = show.IsDownloaded;
+				temp.IsDownloading = show.IsDownloading;
+			}
 			return;
 		}
-		if (App.Download.shows.Count > 0)
+		var item = Shows.Find(x => x.Url == m.Show?.Url) ?? new();
+		switch(m.Status)
 		{
-			QueDownload(App.Download.shows[0]);
+			case DownloadStatus.Downloaded:
+				item.IsDownloaded = true;
+				item.IsDownloading = false;
+				break;
+			case DownloadStatus.Cancelled:
+				item.IsDownloaded = false;
+				item.IsDownloading = false;
+				break;
 		}
 	}
 
 	async Task LoadShows(CancellationToken cancellationToken = default)
 	{
-		if (url is null)
+		var result = await FeedService.GetShowListAsync(url, cancellationToken).ConfigureAwait(false) ?? [];
+		
+		var showDB = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false) ?? [];
+		foreach (var item in showDB)
 		{
-			return;
-		}
-		ArgumentNullException.ThrowIfNull(App.Download);
-		var result = await FeedService.GetShowListAsync(url, cancellationToken).ConfigureAwait(false);
-		if(result is null)
-		{
-			return;
-		}
-		foreach (var item in App.Download.shows)
-		{
+			if(!result.Exists(x => x.Url == item.Url))
+			{
+				continue;
+			}
 			result[result.FindIndex(x => x.Url == item.Url)] = item;
 		}
-		result.FindAll(item => (File.Exists(item.FileName))).ForEach(x => x.IsDownloaded = true);
+		
 		GetDispatcher.Dispatcher?.Dispatch(() => Shows = result);
 	}
 
 	[RelayCommand]
-	public Task Cancel(Show show)
+	public void Cancel(Show show)
 	{
 		ArgumentNullException.ThrowIfNull(show.CancellationTokenSource.Token);
 		logger.Info("Cancelling download");
-		show.CancellationTokenSource.Cancel();
-		return Task.CompletedTask;
+		var item = App.Download?.shows.Find(x => x.Url == show.Url);
+		ArgumentNullException.ThrowIfNull(item);
+		item.CancellationTokenSource.Cancel();
 	}
 
 	[RelayCommand]
-	public void DownloadShow(Show show)
+	public async Task DownloadShow(Show show)
 	{
 		ArgumentNullException.ThrowIfNull(App.Download);
-		if (App.Download.shows.Count > 1)
+		FileService.DeleteFile(show.Url);
+		
+		var CurrentShows = await db.GetShowsAsync(cancellationToken.Token);
+		var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
+		await db.DeleteShowAsync(orphanedShow, cancellationToken.Token).ConfigureAwait(false);
+
+		show.IsDownloaded = true;
+		show.IsDownloading = true;
+		show.Status = DownloadStatus.Downloading;
+		await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
+
+		if (App.Download.shows.Count > 0)
 		{
 			App.Download.shows.Add(show);
 			return;
 		}
 		App.Download.shows.Add(show);
+		
 		QueDownload(show);
 	}
 
@@ -122,40 +144,60 @@ public partial class ShowPageViewModel : BasePageViewModel
 		ArgumentNullException.ThrowIfNull(App.Download);
 		IsBusy = true;
 		show.Status = DownloadStatus.Downloading;
+		
 		ThreadPool.QueueUserWorkItem(async (state) =>
 		{
 			var result = await App.Download.DownloadAsync(show, show.CancellationTokenSource.Token).ConfigureAwait(false);
-			GetDispatcher.Dispatcher?.Dispatch(async () =>
-			{
-				switch (result)
-				{
-					case DownloadStatus.Downloaded:
-						show.Status = DownloadStatus.Downloaded;
-						show.IsDownloading = false;
-						show.IsDownloaded = true;
-						await Shell.Current.DisplayAlert("Download", "Download Complete", "Ok").ConfigureAwait(false);
-						await Task.Delay(1000, cancellationToken.Token).ConfigureAwait(false);
-						WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Downloaded));
-						break;
-					case DownloadStatus.Error:
-						show.Status = DownloadStatus.Error;
-						show.IsDownloaded = false;
-						show.IsDownloading = false;
-						File.Delete(show.FileName);
-						await Shell.Current.DisplayAlert("Download", "Download Failed", "Ok").ConfigureAwait(false);
-						WeakReferenceMessenger.Default.Send(new NavigationMessage(false, DownloadStatus.NotDownloaded));
-						break;
-					case DownloadStatus.Cancelled:
-						FileService.DeleteFile(show.FileName);
-						show.IsDownloaded = false;
-						show.IsDownloading = false;
-						show.Status = DownloadStatus.Cancelled;
-						show.CancellationTokenSource = new();
-						await Shell.Current.DisplayAlert("Download", "Download Cancelled", "Ok").ConfigureAwait(false);
-						WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Cancelled));
-						break;
-				}
-			});
+			await HandleResult(result, show).ConfigureAwait(false);
+		});
+	}
+
+	async Task HandleResult(DownloadStatus result, Show show)
+	{
+		ArgumentNullException.ThrowIfNull(App.Download);
+		string toastText = string.Empty;
+		double fontSize = 14;
+		ToastDuration duration = ToastDuration.Short;
+
+		switch (result)
+		{
+			case DownloadStatus.Downloaded:
+				show.IsDownloaded = true;
+				show.IsDownloading = false;
+				await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
+				WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Downloaded, show));
+				toastText = "Download Complete";
+				await Task.Delay(1000, cancellationToken.Token).ConfigureAwait(false);
+				break;
+			case DownloadStatus.Cancelled:
+				FileService.DeleteFile(show.FileName);
+				show.CancellationTokenSource = new();
+				show.Status = DownloadStatus.Cancelled;
+				show.IsDownloaded = false;
+				show.IsDownloading = false;
+				await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
+				WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Cancelled, show));
+				toastText = "Download Cancelled";
+				break;
+		}
+
+		GetDispatcher.Dispatcher?.Dispatch(async () =>
+		{
+			var toast = Toast.Make(toastText, duration, fontSize);
+			await toast.Show(cancellationTokenSource.Token).ConfigureAwait(false);
+		});
+		
+		if (App.Download.shows.Count > 0)
+		{
+			QueDownload(App.Download.shows[0]);
+			return;
+		}
+
+		logger.Info("Clearing now download status info");
+		GetDispatcher.Dispatcher?.Dispatch(() =>
+		{
+			PercentageLabel = string.Empty;
+			IsBusy = false;
 		});
 	}
 	[RelayCommand]
@@ -171,7 +213,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 			{ "Show", show }
 		};
 		await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter).WaitAsync(cancellationToken).ConfigureAwait(false);
-		WeakReferenceMessenger.Default.Send(new NavigationMessage (true,null));
+		WeakReferenceMessenger.Default.Send(new NavigationMessage (true,null, null));
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>
@@ -194,6 +236,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 	{
 		WeakReferenceMessenger.Default.Unregister<NavigationMessage>(this);
 		cancellationToken?.Dispose();
+		cancellationTokenSource?.Dispose();
 		base.Dispose(disposing);
 	}
 }

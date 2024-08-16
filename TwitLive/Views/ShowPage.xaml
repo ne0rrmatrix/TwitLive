@@ -26,9 +26,9 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
+            <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="310">
                 <Label Text="Download Progress"  HorizontalOptions="Center"/>
-                <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Green" ScaleX="2" ScaleY="3" >
+                <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Blue" ScaleX="2" ScaleY="3" >
                      <ProgressBar.Behaviors>
                          <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
                      </ProgressBar.Behaviors>
@@ -48,7 +48,7 @@
                     <DataTemplate x:DataType="model:Show">
                         <Grid HorizontalOptions="Center">
                         <Frame Background="White" 
-                            WidthRequest="400"
+                            WidthRequest="300"
                             HorizontalOptions="Center"
                             CornerRadius="10">
                                 <StackLayout>
@@ -61,7 +61,7 @@
                                         FontAttributes="Bold" />
                                     <Image
                                         Aspect="AspectFit"
-                                        WidthRequest="{OnIdiom Phone=300, Default=380}" 
+                                        WidthRequest="{OnIdiom Default=250}" 
                                         HorizontalOptions="Center"
                                         HeightRequest="200"
                                         Margin="10,0,10,0">
@@ -109,7 +109,7 @@
                                     </Button>
                                        
                                     <WebView 
-                                            WidthRequest="{OnIdiom Phone=300, Default=380}" 
+                                            WidthRequest="{OnIdiom Default=250}" 
                                             HeightRequest="1600"
                                             Navigating="Webview_Navigating"
                                             x:Name="webview">
