@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nerdnewsnavigator2.twitpodcasts" android:versionCode="1">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nerdnewsnavigator2.twitpodcasts" android:versionCode="2">
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:enableOnBackInvokedCallback="true" android:supportsRtl="true" android:label="Twit Podcasts">
 		<service android:name="CommunityToolkit.Maui.Services" android:exported="false" android:enabled="true" android:foregroundServiceType="mediaPlayback">
 			<intent-filter>
