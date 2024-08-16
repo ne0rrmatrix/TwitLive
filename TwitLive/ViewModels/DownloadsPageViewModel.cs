@@ -47,7 +47,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		}
 	}
 
-	public async Task GetShows(CancellationToken cancellationToken = default)
+	async Task GetShows(CancellationToken cancellationToken = default)
 	{
 		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
 		GetDispatcher.Dispatcher?.Dispatch(() => Shows = downloads);

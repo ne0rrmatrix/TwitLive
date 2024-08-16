@@ -22,7 +22,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
 	}
 	
-	public void HandleMessage(NavigationMessage message)
+	void HandleMessage(NavigationMessage message)
 	{
 		if (message.Status is not null)
 		{
@@ -81,7 +81,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		}
 	}
 
-	void Webview_Navigating(System.Object sender, Microsoft.Maui.Controls.WebNavigatingEventArgs e)
+	static void Webview_Navigating(System.Object sender, Microsoft.Maui.Controls.WebNavigatingEventArgs e)
 	{
 		if (e.Url.Contains("https://") || e.Url.Contains("http://"))
 		{
@@ -89,7 +89,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		}
 	}
 
-	public void StartTimer()
+	void StartTimer()
 	{
 		if (timer is not null)
 		{
@@ -101,7 +101,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		timer.Start();
 	}
 
-	public void StopTimer()
+	void StopTimer()
 	{
 		if (timer is not null)
 		{
