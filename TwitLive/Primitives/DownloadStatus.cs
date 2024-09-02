@@ -4,6 +4,4 @@ public enum DownloadStatus
 	NotDownloaded,
 	Downloading,
 	Downloaded,
-	Cancelled,
-	Error
 }

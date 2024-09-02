@@ -6,16 +6,49 @@
              xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
              xmlns:app="clr-namespace:TwitLive.Primitives"
              xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+             xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
+             xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:DataType="viewModel:VideoPlayerViewModel"
              ios:Page.UseSafeArea="False"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="#34AAD2"
-             Shell.BackgroundColor="#34AAD2">
-     <ContentPage.Behaviors>
-        <toolkit:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
-    </ContentPage.Behaviors>
-    <Grid>
-        <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
+             BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
+             Shell.BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}">
+     <ContentPage.Resources>
+     <ResourceDictionary>
+          <!-- LIGHT -->
+          <Color x:Key="LightPageBackgroundColor">#FFFFFF</Color>
+          <Color x:Key="LightSectionBackgroundColor">#FAFAFA</Color>
+          <Color x:Key="LightSectionHeaderBackgroundColor">#E9E9E9</Color>
+          <Color x:Key="LightTextColor">#000000</Color>
+ 
+          <!-- DARK -->
+          <Color x:Key="DarkPageBackgroundColor">#000000</Color>
+          <Color x:Key="DarkSectionBackgroundColor">#333333</Color>
+          <Color x:Key="DarkSectionHeaderBackgroundColor">#1E1E1E</Color>
+          <Color x:Key="DarkTextColor">#FFFFFF</Color>
+ 
+          <Style x:Key="InfoLabel" TargetType="Label">
+              <Setter Property="Padding" Value="10" />
+              <Setter Property="WidthRequest" Value="{OnIdiom Phone=310, Default=630}" />
+              <Setter Property="FontSize" Value="14" />
+          </Style>
+          <Style x:Key="WebLabel" TargetType="WebView">
+              <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightPageBackgroundColor}}" />
+             <Setter Property="WidthRequest" Value="{OnIdiom Phone=310, Default=630}" />
+         </Style>
+         <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+         <toolkit:EnumToBoolConverter x:Key="DownloadConverter">
+             <toolkit:EnumToBoolConverter.TrueValues>
+                 <app:DownloadStatus>NotDownloaded</app:DownloadStatus>
+                 <app:DownloadStatus>Downloaded</app:DownloadStatus>
+                 <app:DownloadStatus>Downloading</app:DownloadStatus>
+             </toolkit:EnumToBoolConverter.TrueValues>
+         </toolkit:EnumToBoolConverter>
+         <toolkit:EnumToBoolConverter x:Key="StatusConverter"/>
+     </ResourceDictionary>
+ </ContentPage.Resources>
+    <Grid HorizontalOptions="Center">
+       <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
             <Label Text="Download Progress"  HorizontalOptions="Center"/>
             <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Blue" ScaleX="2" ScaleY="3" >
                 <ProgressBar.Behaviors>
@@ -23,10 +56,27 @@
                 </ProgressBar.Behaviors>
             </ProgressBar>
             <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
-        </StackLayout>
-          <ScrollView>
-            <StackLayout>
-                <toolkit:MediaElement 
+       </StackLayout>
+       <ScrollView>
+            <Border StrokeThickness="4" Padding="16,8" HorizontalOptions="Center"  Stroke="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor}, Light={StaticResource DarkPageBackgroundColor}}">
+                 <Border.StrokeShape>
+                     <RoundRectangle CornerRadius="20,20,20,20"/>
+                 </Border.StrokeShape>
+                <VerticalStackLayout>
+                     <Border
+                         Margin="5"
+                         Stroke="Transparent"
+                         StrokeThickness="0"
+                         StrokeShape="RoundRectangle 10">
+                     <Label Text="{Binding Show.Title}"
+                         FontSize="Title"
+                         HorizontalOptions="Center"
+                         Style="{StaticResource Headline}"
+                         BackgroundColor="{AppThemeBinding Dark={StaticResource  DarkSectionHeaderBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
+                         TextColor="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}"
+                         FontAttributes="Bold"/>
+                         </Border>
+                    <toolkit:MediaElement 
                         HorizontalOptions="Center"
                         Margin="10,10,10,10" 
                         x:Name="mediaElement"
@@ -37,34 +87,18 @@
                         HeightRequest="{OnIdiom Phone=240, Default=320}" 
                         Source="{Binding Show.Url}" 
                         ShouldAutoPlay="True" 
-                        ShouldKeepScreenOn="True" />
-                    <Frame Background="White" 
-                        WidthRequest="{OnIdiom Phone=320, Default=640}"
+                        ShouldKeepScreenOn="True" />                                 
+                    <Label 
+                        LineBreakMode="WordWrap"
+                        Style="{StaticResource InfoLabel}"
+                        TextType="Html"
                         HorizontalOptions="Center"
-                        Margin="10,10,10,10" 
-                        Padding="10" 
-                        CornerRadius="10">
-                            <StackLayout>                                         
-                                <Label 
-                                    Margin="10,10,10,10"
-                                    HorizontalOptions="Center"
-                                    Text="{Binding Show.Title}" 
-                                    TextColor="Black" 
-                                    FontSize="Title" 
-                                    FontAttributes="Bold" />
-                                <WebView 
-                                    Margin="10,10,10,10"
-                                    WidthRequest="{OnIdiom Phone=310, Default=630}" 
-                                    HeightRequest="2000"
-                                    Navigating="Webview_Navigating"
-                                    x:Name="webview">
-                                    <WebView.Source>
-                                        <HtmlWebViewSource Html="{Binding Show.Description}" />
-                                    </WebView.Source>
-                                </WebView>
-                            </StackLayout>
-                    </Frame>
-            </StackLayout>
-          </ScrollView>
+                        Text="{Binding Show.Description}" 
+                        BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionHeaderBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
+                        TextColor="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}"
+                        FontSize="Body" />
+                </VerticalStackLayout>
+            </Border>
+       </ScrollView>
     </Grid>
 </ContentPage>

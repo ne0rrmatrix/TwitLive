@@ -12,39 +12,26 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	[ObservableProperty]
 	List<Show> shows;
 	IDb db { get; set; }
-#pragma warning disable IDE0044
-	CancellationTokenSource cancellationToken;
-#pragma warning restore IDE0044
-
 	public DownloadsPageViewModel(IDb db)
 	{
 		this.db = db;
 		shows = []; 
-		cancellationToken = new();
-		GetDispatcher.Dispatcher?.Dispatch(async () => { await GetShows(cancellationToken.Token).ConfigureAwait(false); OnPropertyChanged(nameof(Shows)); });
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
+		GetDispatcher.Dispatcher?.Dispatch(async () => { await GetShows(CancellationToken.None).ConfigureAwait(false); OnPropertyChanged(nameof(Shows)); });
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage());
 	}
 
-	void HandleMessage(NavigationMessage message)
+	async Task HandleMessage()
 	{
-		ArgumentNullException.ThrowIfNull(App.Download);
-
-		if (App.Download.shows.Count == 0 || !message.Value)
+		if (App.Download?.shows.Count == 0)
 		{
 			GetDispatcher.Dispatcher?.Dispatch(() =>
 			{
-				System.Diagnostics.Debug.WriteLine("Clearing Download Message");
 				PercentageLabel = string.Empty;
 				IsBusy = false;
 			});
 		}
-		else if (message.Value)
-		{
-			GetDispatcher.Dispatcher?.Dispatch(() =>
-			{
-				PullToRefreshCommand.Execute(this);
-			});
-		}
+		Shows.Clear();
+		await GetShows(CancellationToken.None).ConfigureAwait(false);
 	}
 
 	async Task GetShows(CancellationToken cancellationToken = default)
@@ -75,21 +62,13 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		if(File.Exists(show.FileName))
 		{
 			File.Delete(show.FileName);
-			System.Diagnostics.Trace.TraceInformation($"Deleted {show.FileName}");
-		}
-		else
-		{
-			System.Diagnostics.Trace.TraceInformation($"File {show.FileName} not found");
 		}
 		
 		var CurrentShows = await db.GetShowsAsync();
 		var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
-		if (orphanedShow is not null)
-		{
-			await db.DeleteShowAsync(orphanedShow).ConfigureAwait(false);
-		}
+		await db.DeleteShowAsync(orphanedShow).ConfigureAwait(false);
 		Shows.Clear();
-		await GetShows(cancellationToken.Token).ConfigureAwait(false);
+		await GetShows(CancellationToken.None).ConfigureAwait(false);
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>
@@ -97,20 +76,14 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		Shows.Clear();
 		IsRefreshing = true;
 		IsBusy = true;
-		OnPropertyChanged(nameof(IsBusy));
-		OnPropertyChanged(nameof(IsRefreshing));
-		await GetShows(cancellationToken.Token).ConfigureAwait(false);
+		await GetShows(CancellationToken.None).ConfigureAwait(false);
 		IsBusy = false;
 		IsRefreshing = false;
-		OnPropertyChanged(nameof(IsBusy));
-		OnPropertyChanged(nameof(IsRefreshing));
 	});
 
 	protected override void Dispose(bool disposing)
 	{
-
 		WeakReferenceMessenger.Default.Unregister<NavigationMessage>(this);
-		cancellationToken?.Dispose();
 		base.Dispose(disposing);
 	}
 }

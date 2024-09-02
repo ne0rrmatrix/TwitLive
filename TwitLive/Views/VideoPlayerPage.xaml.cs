@@ -1,5 +1,7 @@
 using System.Timers;
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.Messaging;
+using MetroLog;
 using TwitLive.Interfaces;
 using TwitLive.Models;
 using TwitLive.Primitives;
@@ -15,30 +17,47 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 
 	Show? show;
 	IDb? item;
+	readonly ILogger logger = LoggerFactory.GetLogger(nameof(VideoPlayerPage));
 	public VideoPlayerPage(VideoPlayerViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
 	}
-	
+	protected override void OnNavigatedTo(NavigatedToEventArgs args)
+	{
+		base.OnNavigatedTo(args);
+#if IOS || ANDROID || MACCATALYST
+		if (Application.Current?.PlatformAppTheme == AppTheme.Dark)
+		{
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Colors.Black);
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.LightContent);
+		}
+		else
+		{
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Color.FromArgb("#E9E9E9"));
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.DarkContent);
+		}
+#endif
+	}
 	void HandleMessage(NavigationMessage message)
 	{
-		if (message.Status is not null)
+		if (message.Show is not null)
 		{
-			System.Diagnostics.Debug.WriteLine("Did not navigate to video player. Not resetting videoplayer timer.");
+			logger.Info("Did not navigate to video player. Not resetting videoplayer timer.");
 			return;
 		}
-		System.Diagnostics.Debug.WriteLine("Resetting timer in video player");
+		logger.Info("Resetting timer in video player");
 		StopTimer();
 		mediaElement.MediaOpened -= MediaElement_MediaOpened;
 		if (BindingContext is not VideoPlayerViewModel currentShow)
 		{
+			logger.Info("BindingContext is not VideoPlayerViewModel");
 			show = null;
 			item = null;
 			return;
 		}
-
+		logger.Info($"Navigated to video player with show: {currentShow.Show.Title}");
 		show = currentShow.Show;
 		item = currentShow.Db;
 		mediaElement.MediaOpened += MediaElement_MediaOpened;
@@ -48,20 +67,25 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	{
 		ArgumentNullException.ThrowIfNull(show);
 		ArgumentNullException.ThrowIfNull(item);
-		var result = await item.GetShowAsync(show.Title).ConfigureAwait(true);
+		logger.Info("Media opened");
+		var result = await item.GetShowAsync(show).ConfigureAwait(true);
 		if (result is null)
 		{
 			StartTimer();
-			System.Diagnostics.Debug.WriteLine("Previous position not found");
+			logger.Info("Previous position not found");
 		}
 		else if (result.Position is > 0)
 		{
-			System.Diagnostics.Debug.WriteLine($"Loading previous position: {result.Position}");
-			await MainThread.InvokeOnMainThreadAsync(async () => 
+			logger.Info($"Loading previous position: {result.Position}");
+			Application.Current?.Dispatcher.Dispatch(async () => 
 			{
-				await mediaElement.SeekTo(TimeSpan.FromSeconds(result.Position)).ConfigureAwait(true); 
-				StartTimer(); 
+				await mediaElement.SeekTo(TimeSpan.FromSeconds(result.Position)).ConfigureAwait(true);
+				StartTimer();
 			});
+		}
+		else
+		{
+			logger.Info("Error: Neither show nor position found!");
 		}
 	}
 	
@@ -73,11 +97,11 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		{
 			show.Position = (int)mediaElement.Position.TotalSeconds;
 			await item.SaveShowAsync(show);
-			System.Diagnostics.Debug.WriteLine($"Show: {show.Title} at Position: {show.Position}");
+			logger.Info($"Show: {show.Title} at Position: {show.Position}");
 		}
 		else
 		{
-			System.Diagnostics.Debug.WriteLine("Show title is empty");
+			logger.Info("Show title is empty");
 		}
 	}
 
@@ -115,12 +139,12 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	{
 		if (!disposedValue)
 		{
+			mediaElement.MediaOpened -= MediaElement_MediaOpened;
 			if (disposing && timer is not null)
 			{
 				timer.Elapsed -= UpdatePlayedTime;
 				timer.Stop();
 				timer.Dispose();
-				mediaElement.MediaOpened -= MediaElement_MediaOpened;
 			}
 			disposedValue = true;
 		}

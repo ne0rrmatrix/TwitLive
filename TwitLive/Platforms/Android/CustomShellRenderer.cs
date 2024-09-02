@@ -1,0 +1,246 @@
+﻿using System.ComponentModel;
+using Android.OS;
+using Android.Views;
+using AndroidX.DrawerLayout.Widget;
+using AndroidX.ViewPager2.Widget;
+using Google.Android.Material.BottomNavigation;
+using Microsoft.Maui.Controls.Handlers.Compatibility;
+using Microsoft.Maui.Controls.Platform.Compatibility;
+using Microsoft.Maui.Platform;
+using View = Android.Views.View;
+
+namespace TwitLive.Platforms.Android;
+
+public class CustomShellRenderer : ShellRenderer
+{
+	protected override IShellSectionRenderer CreateShellSectionRenderer(ShellSection shellSection)
+	{
+		return new ShellSectionRendererWorkaround(this);
+	}
+
+	protected override IShellToolbarTracker CreateTrackerForToolbar(AndroidX.AppCompat.Widget.Toolbar toolbar)
+	{
+		return new ShellToolbarTrackerWorkaround(this, toolbar, ((IShellContext)this).CurrentDrawerLayout);
+	}
+
+	protected override IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem)
+	{
+		return new ShellItemRendererWorkaround(this);
+	}
+
+	sealed class ShellItemRendererWorkaround : ShellItemRenderer
+	{
+		IMauiContext? MauiContext => ShellContext.Shell.Handler?.MauiContext;
+
+		BottomNavigationView? bottomView;
+		public ShellItemRendererWorkaround(IShellContext shellContext) : base(shellContext)
+		{
+		}
+
+		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			var view = base.OnCreateView(inflater, container, savedInstanceState);
+			bottomView = (view as ViewGroup)?.GetChildrenOfType<BottomNavigationView>().FirstOrDefault();
+			return view;
+		}
+
+		protected override void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == BaseShellItem.IconProperty.PropertyName ||
+				e.PropertyName == BaseShellItem.TitleProperty.PropertyName)
+			{
+				var content = (ShellSection)sender;
+				var index = ((IShellItemController)ShellItem).GetItems().IndexOf(content);
+
+				var itemCount = ((IShellItemController)ShellItem).GetItems().Count;
+				var maxItems = bottomView?.MaxItemCount;
+
+				if (itemCount > maxItems && index > maxItems - 2)
+				{
+					return;
+				}
+
+				var menuItem = bottomView?.Menu.FindItem(index);
+
+				if (e.PropertyName == BaseShellItem.IconProperty.PropertyName)
+				{
+					UpdateShellSectionIcon(content, menuItem);
+				}
+				else if (menuItem is not null)
+				{
+					UpdateShellSectionTitle(content, menuItem);
+				}
+			}
+			else
+			{
+				base.OnShellSectionPropertyChanged(sender, e);
+			}
+		}
+
+		protected override async void UpdateShellSectionIcon(ShellSection? shellSection, IMenuItem? menuItem)
+		{
+			if (shellSection == null || menuItem == null)
+			{
+				return;
+			}
+			await SetMenuItemIcon(menuItem, shellSection.Icon, MauiContext);
+		}
+
+		protected override void UpdateShellSectionTitle(ShellSection shellSection, IMenuItem menuItem)
+		{
+			using (var title = new Java.Lang.String(shellSection.Title))
+			{
+				menuItem.SetTitle(title);
+			}
+		}
+
+		internal static async Task SetMenuItemIcon(IMenuItem? menuItem, ImageSource source, IMauiContext? context)
+		{
+			ArgumentNullException.ThrowIfNull(menuItem);
+			if (menuItem.Handle == IntPtr.Zero)
+			{
+				return;
+			}
+
+			if (source is null)
+			{
+				return;
+			}
+			if (context?.Context is null)
+			{
+				return;
+			}
+			var services = context.Services;
+			var provider = services.GetRequiredService<IImageSourceServiceProvider>();
+			var imageSourceService = provider.GetRequiredImageSourceService(source);
+
+			var result = await imageSourceService.GetDrawableAsync(
+				source,
+				context.Context);
+
+			if (menuItem.Handle != IntPtr.Zero)
+			{
+				menuItem.SetIcon(result?.Value);
+			}
+		}
+	}
+
+	class ShellToolbarTrackerWorkaround : ShellToolbarTracker
+	{
+		readonly DrawerLayout drawerLayout;
+
+		public static ShellToolbarTrackerWorkaround? Current { get; set; }
+
+		public ShellToolbarTrackerWorkaround(
+			IShellContext shellContext,
+			AndroidX.AppCompat.Widget.Toolbar toolbar,
+			DrawerLayout drawerLayout) : base(shellContext, toolbar, drawerLayout)
+		{
+			Current = this;
+			// HERE CHANGE THE COLOR YOU NEED FOR YOUR APP
+			if (Application.Current?.RequestedTheme == AppTheme.Light)
+			{
+				Current.TintColor = Color.FromArgb("#000000");
+			}
+			else
+			{
+				Current.TintColor = Color.FromArgb("#FFFFFF");
+			}
+			this.drawerLayout = drawerLayout;
+		}
+	}
+
+	class ShellSectionRendererWorkaround : ShellSectionRenderer
+	{
+		bool selecting;
+		readonly IShellContext shellContext;
+		public ShellToolbarTrackerWorkaround? ToolbarTracker { get; set; }
+		ViewPager2? viewPager;
+		IShellSectionController SectionController => (IShellSectionController)ShellSection;
+		IShellController ShellController => shellContext.Shell;
+
+		public ShellSectionRendererWorkaround(IShellContext shellContext) : base(shellContext)
+		{
+			this.shellContext = shellContext;
+		}
+
+		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			var view = base.OnCreateView(inflater, container, savedInstanceState);
+			ToolbarTracker = ShellToolbarTrackerWorkaround.Current;
+			ShellToolbarTrackerWorkaround.Current = null;
+			viewPager = (view as ViewGroup)?.GetChildrenOfType<ViewPager2>().FirstOrDefault();
+			return view;
+		}
+
+		protected override void OnPageSelected(int position)
+		{
+			if (selecting)
+			{
+				return;
+			}
+
+			var shellSection = ShellSection;
+			var visibleItems = SectionController.GetItems();
+
+			// This mainly happens if all of the items that are part of this shell section 
+			// vanish. Android calls `OnPageSelected` with position zero even though the view pager is
+			// empty
+			if (position >= visibleItems.Count)
+			{
+				return;
+			}
+
+			var shellContent = visibleItems[position];
+
+			if (shellContent == shellSection.CurrentItem)
+			{
+				return;
+			}
+
+			var stack = shellSection.Stack.ToList();
+			bool result = ShellController.ProposeNavigation(ShellNavigationSource.ShellContentChanged,
+				(ShellItem)shellSection.Parent, shellSection, shellContent, stack, true);
+
+			if (result)
+			{
+				UpdateCurrentItem(shellContent);
+			}
+			else if (shellSection?.CurrentItem != null)
+			{
+				var currentPosition = visibleItems.IndexOf(shellSection.CurrentItem);
+				selecting = true;
+
+				// Android doesn't really appreciate you calling SetCurrentItem inside a OnPageSelected callback.
+				// It wont crash but the way its programmed doesn't really anticipate re-entrancy around that method
+				// and it ends up going to the wrong location. Thus we must invoke.
+
+				viewPager?.Post(() =>
+				{
+					if (currentPosition < viewPager.ChildCount && ToolbarTracker != null)
+					{
+						viewPager.SetCurrentItem(currentPosition, false);
+						UpdateCurrentItem(shellSection.CurrentItem);
+					}
+
+					selecting = false;
+				});
+			}
+		}
+
+		void UpdateCurrentItem(ShellContent content)
+		{
+			if (ToolbarTracker == null)
+			{
+				return;
+			}
+
+			var page = ((IShellContentController)content).GetOrCreateContent();
+			ArgumentNullException.ThrowIfNull(page);
+
+			ShellSection.SetValueFromRenderer(ShellSection.CurrentItemProperty, content);
+			ToolbarTracker.Page = page;
+		}
+	}
+
+}

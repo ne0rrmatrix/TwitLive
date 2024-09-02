@@ -35,10 +35,14 @@ public static class MauiProgram
 			fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
 		});
+
 		builder.ConfigureMauiHandlers(handlers =>
 		{
 #if WINDOWS
             handlers.AddHandler<RefreshView, MauiRefreshViewHandler>();
+#endif
+#if ANDROID
+			handlers.AddHandler(typeof(Shell), typeof(TwitLive.Platforms.Android.CustomShellRenderer));
 #endif
 		});
 		#region Logging
@@ -77,11 +81,8 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<ShowPage>();
 		builder.Services.AddSingleton<ShowPageViewModel>();
-#if WINDOWS
-        builder.Services.AddSingleton<VideoPlayerPage>();
-#else
-		builder.Services.AddSingleton<VideoPlayerPage>();
-#endif
+
+		builder.Services.AddTransient<VideoPlayerPage>();
 		builder.Services.AddSingleton<VideoPlayerViewModel>();
 
 		builder.Services.AddSingleton<DownloadsPage>();

@@ -8,13 +8,13 @@
     Shell.TabBarIsVisible="True">
     
     <TabBar>
-       <Tab Title="Home" Route="Home" Icon="house.png">
+       <Tab Title="Home" Route="Home" Icon="home.png">
             <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" />
         </Tab>
         <Tab Title="VideoPlayer" Route="VideoPlayerPage" Icon="videoplayer.png">
             <ShellContent ContentTemplate="{DataTemplate local:VideoPlayerPage}" />
         </Tab>
-        <Tab Title="Downloads" Route="DownloadsPage" Icon="dotnet_bot.png">
+        <Tab Title="Downloads" Route="DownloadsPage" Icon="download.png">
             <ShellContent ContentTemplate="{DataTemplate local:DownloadsPage}" />
         </Tab>
     </TabBar>

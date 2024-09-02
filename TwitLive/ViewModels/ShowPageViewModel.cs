@@ -2,6 +2,7 @@ using System.Web;
 using System.Windows.Input;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MetroLog;
@@ -14,19 +15,12 @@ namespace TwitLive.ViewModels;
 [QueryProperty("Url", "Url")]
 public partial class ShowPageViewModel : BasePageViewModel
 {
-#pragma warning disable IDE0044
-	CancellationTokenSource cancellationTokenSource;
-	CancellationTokenSource cancellationToken;
-#pragma warning restore IDE0044
-
+	[ObservableProperty]
 	List<Show> shows;
-	public List<Show> Shows
-	{
-		get => shows;
-		set => SetProperty(ref shows, value);
-	}
 
-	public string? Url
+	string url;
+	
+	public string Url
 	{
 		get => url;
 		set
@@ -35,83 +29,44 @@ public partial class ShowPageViewModel : BasePageViewModel
 			SetProperty(ref url, item);
 			ThreadPool.QueueUserWorkItem(async (state) =>
 			{
-				await LoadShows(cancellationToken.Token).ConfigureAwait(false);
+				await LoadShows(CancellationToken.None).ConfigureAwait(false);
 			});
 		}
 	}
+	
 
-	string? url;
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(ShowPageViewModel));
 	readonly IDb db;
 
 	public ShowPageViewModel(IDb db)
 	{
+		url = string.Empty;
 		this.db = db;
 		shows = [];
-		cancellationTokenSource = new();
-		cancellationToken = new();
-		System.Diagnostics.Trace.TraceInformation("ShowPageViewModel");
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage(m));
-	}
-
-	async Task HandleMessage(NavigationMessage m)
-	{
-		if(!m.Value)
-		{
-			var showDB = await db.GetShowsAsync(CancellationToken.None).ConfigureAwait(false) ?? [];
-			showDB.ForEach(x =>
-			{
-				var item = Shows.Find(y => y.Url == x.Url) ?? new();
-				item.IsDownloaded = x.IsDownloaded;
-				item.IsDownloading = x.IsDownloading;
-			});
-			foreach (var show in Shows)
-			{
-				var temp = showDB.Find(x => x.Url == show.Url) ?? new();
-				temp.IsDownloaded = show.IsDownloaded;
-				temp.IsDownloading = show.IsDownloading;
-			}
-			return;
-		}
-		var item = Shows.Find(x => x.Url == m.Show?.Url) ?? new();
-		switch(m.Status)
-		{
-			case DownloadStatus.Downloaded:
-				item.IsDownloaded = true;
-				item.IsDownloading = false;
-				break;
-			case DownloadStatus.Cancelled:
-				item.IsDownloaded = false;
-				item.IsDownloading = false;
-				break;
-		}
-	}
-
-	async Task LoadShows(CancellationToken cancellationToken = default)
-	{
-		var result = await FeedService.GetShowListAsync(url, cancellationToken).ConfigureAwait(false) ?? [];
-		
-		var showDB = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false) ?? [];
-		foreach (var item in showDB)
-		{
-			if(!result.Exists(x => x.Url == item.Url))
-			{
-				continue;
-			}
-			result[result.FindIndex(x => x.Url == item.Url)] = item;
-		}
-		
-		GetDispatcher.Dispatcher?.Dispatch(() => Shows = result);
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,(r, m) => ThreadPool.QueueUserWorkItem(async (state) => await HandleMessage(m)));
 	}
 
 	[RelayCommand]
-	public void Cancel(Show show)
+	public async Task Cancel(Show show)
 	{
-		ArgumentNullException.ThrowIfNull(show.CancellationTokenSource.Token);
+		ArgumentNullException.ThrowIfNull(App.Download);
 		logger.Info("Cancelling download");
-		var item = App.Download?.shows.Find(x => x.Url == show.Url);
-		ArgumentNullException.ThrowIfNull(item);
-		item.CancellationTokenSource.Cancel();
+		var item = App.Download.shows.Find(x => x.Url == show.Url);
+		if(item is null)
+		{
+			logger.Info("Cancel Item is null");
+			return;
+		}
+		if (App.Download.shows.Count > 1 && show.Url != App.Download.CurrentShow?.Url)
+		{
+			logger.Info("Cancel Item is not current show");
+			await db.DeleteShowAsync(show, CancellationToken.None).ConfigureAwait(false);
+			ArgumentNullException.ThrowIfNull(item);
+			App.Download.shows.Remove(item);
+			WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, item));
+			return;
+		}
+		await item.CancellationTokenSource.CancelAsync().ConfigureAwait(false);
 	}
 
 	[RelayCommand]
@@ -119,32 +74,56 @@ public partial class ShowPageViewModel : BasePageViewModel
 	{
 		ArgumentNullException.ThrowIfNull(App.Download);
 		FileService.DeleteFile(show.Url);
-		
-		var CurrentShows = await db.GetShowsAsync(cancellationToken.Token);
-		var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
-		await db.DeleteShowAsync(orphanedShow, cancellationToken.Token).ConfigureAwait(false);
-
-		show.IsDownloaded = true;
-		show.IsDownloading = true;
 		show.Status = DownloadStatus.Downloading;
-		await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
-
-		if (App.Download.shows.Count > 0)
+		App.Download.shows.Add(show);
+		await db.SaveShowAsync(show, CancellationToken.None).ConfigureAwait(false);
+		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Downloading, show));
+		if (App.Download.shows.Count > 1)
 		{
-			App.Download.shows.Add(show);
 			return;
 		}
-		App.Download.shows.Add(show);
-		
-		QueDownload(show);
+		var item = App.Download.shows.Find(x => x.Url == show.Url);
+		ArgumentNullException.ThrowIfNull(item);
+		QueDownload(item);
+	}
+
+	[RelayCommand]
+	public static async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
+	{
+		if(File.Exists(show.FileName))
+		{
+			show.Url = show.FileName;
+		}
+
+		var navigationParameter = new Dictionary<string, object>
+		{
+			{ "Show", show }
+		};
+		await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter).WaitAsync(cancellationToken).ConfigureAwait(false);
+		WeakReferenceMessenger.Default.Send(new NavigationMessage (true,DownloadStatus.NotDownloaded, null));
+	}
+
+	async Task LoadShows(CancellationToken cancellationToken = default)
+	{
+		var items = await FeedService.GetShowListAsync(Url, cancellationToken).ConfigureAwait(false) ?? [];
+		var downloads = await db.GetShowsAsync(CancellationToken.None).ConfigureAwait(false) ?? [];
+
+		for (int i = 0; i < items.Count; i++)
+		{
+			var temp = downloads.Find(x => x.Url == items[i].Url);
+			if (temp is not null)
+			{
+				items[i].Status = temp.Status;
+			}
+		}
+		GetDispatcher.Dispatcher?.Dispatch(() => Shows = items);
 	}
 
 	void QueDownload(Show show)
 	{
 		ArgumentNullException.ThrowIfNull(App.Download);
 		IsBusy = true;
-		show.Status = DownloadStatus.Downloading;
-		
+
 		ThreadPool.QueueUserWorkItem(async (state) =>
 		{
 			var result = await App.Download.DownloadAsync(show, show.CancellationTokenSource.Token).ConfigureAwait(false);
@@ -162,63 +141,84 @@ public partial class ShowPageViewModel : BasePageViewModel
 		switch (result)
 		{
 			case DownloadStatus.Downloaded:
-				show.IsDownloaded = true;
-				show.IsDownloading = false;
-				await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
+				show.Status = DownloadStatus.Downloaded;
+				await db.SaveShowAsync(show, CancellationToken.None).ConfigureAwait(false);
 				WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Downloaded, show));
 				toastText = "Download Complete";
-				await Task.Delay(1000, cancellationToken.Token).ConfigureAwait(false);
+				await Task.Delay(1000, CancellationToken.None).ConfigureAwait(false);
 				break;
-			case DownloadStatus.Cancelled:
+			case DownloadStatus.NotDownloaded:
 				FileService.DeleteFile(show.FileName);
 				show.CancellationTokenSource = new();
-				show.Status = DownloadStatus.Cancelled;
-				show.IsDownloaded = false;
-				show.IsDownloading = false;
-				await db.SaveShowAsync(show, cancellationToken.Token).ConfigureAwait(false);
-				WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Cancelled, show));
+				await db.DeleteShowAsync(show, CancellationToken.None).ConfigureAwait(false);
+				WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, show));
 				toastText = "Download Cancelled";
 				break;
 		}
-
+		var temp = App.Download.shows.Find(x => x.Url == show.Url);
+		if (temp is not null)
+		{
+			App.Download.shows.Remove(temp);
+		}
 		GetDispatcher.Dispatcher?.Dispatch(async () =>
 		{
 			var toast = Toast.Make(toastText, duration, fontSize);
-			await toast.Show(cancellationTokenSource.Token).ConfigureAwait(false);
+			await toast.Show(CancellationToken.None).ConfigureAwait(false);
 		});
-		
+
 		if (App.Download.shows.Count > 0)
 		{
 			QueDownload(App.Download.shows[0]);
 			return;
 		}
 
-		logger.Info("Clearing now download status info");
 		GetDispatcher.Dispatcher?.Dispatch(() =>
 		{
 			PercentageLabel = string.Empty;
 			IsBusy = false;
 		});
 	}
-	[RelayCommand]
-	public static async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
+
+	async Task HandleMessage(NavigationMessage m)
 	{
-		if(File.Exists(show.FileName))
+		if (App.Download?.shows.Count == 0)
 		{
-			show.Url = show.FileName;
+			GetDispatcher.Dispatcher?.Dispatch(() =>
+			{
+				PercentageLabel = string.Empty;
+				IsBusy = false;
+			});
 		}
 
-		var navigationParameter = new Dictionary<string, object>
+		var show = Shows.Find(x => x.Url == m.Show?.Url);
+		if (show is not null)
 		{
-			{ "Show", show }
-		};
-		await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter).WaitAsync(cancellationToken).ConfigureAwait(false);
-		WeakReferenceMessenger.Default.Send(new NavigationMessage (true,null, null));
+			logger.Info($"Updating show status: {show.Title} :Status: {m.Status}");
+			GetDispatcher.Dispatcher?.Dispatch(() => show.Status = m.Status);
+		}
+
+		var downloads = await db.GetShowsAsync(CancellationToken.None).ConfigureAwait(false) ?? [];
+		if (Shows.Count == 0 || downloads.Count == 0)
+		{
+			logger.Info("Shows or Downloads is empty");
+			await LoadShows(CancellationToken.None).ConfigureAwait(false);
+			return;
+		}
+
+		foreach (var item in downloads)
+		{
+			var temp = Shows.Find(x => x.Url == item.Url);
+			if (temp is not null)
+			{
+				logger.Info($"Updating download status: {temp.Title} :Status: {item.Status}");
+				GetDispatcher.Dispatcher?.Dispatch(() => temp.Status = item.Status);
+			}
+		}
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>
 	{
-		if (Url is null || string.IsNullOrEmpty(url))
+		if (string.IsNullOrEmpty(Url))
 		{
 			IsBusy = false;
 			IsRefreshing = false;
@@ -226,17 +226,13 @@ public partial class ShowPageViewModel : BasePageViewModel
 		}
 		Shows.Clear();
 		IsRefreshing = true;
-		IsBusy = true;
-		await LoadShows(cancellationToken.Token).ConfigureAwait(false);
-		IsBusy = false;
+		await LoadShows(CancellationToken.None).ConfigureAwait(false);
 		IsRefreshing = false;
 	});
 
 	protected override void Dispose(bool disposing)
 	{
 		WeakReferenceMessenger.Default.Unregister<NavigationMessage>(this);
-		cancellationToken?.Dispose();
-		cancellationTokenSource?.Dispose();
 		base.Dispose(disposing);
 	}
 }

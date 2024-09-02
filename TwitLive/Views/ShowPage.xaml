@@ -9,62 +9,86 @@
              xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:Class="TwitLive.Views.ShowPage"
              x:DataType="viewModel:ShowPageViewModel"
-             BackgroundColor="#34AAD2"
-             Shell.BackgroundColor="#34AAD2">
+             BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
+             Shell.BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}">
     <ContentPage.Resources>
         <ResourceDictionary>
+             <!-- LIGHT -->
+             <Color x:Key="LightPageBackgroundColor">#FFFFFF</Color>
+             <Color x:Key="LightSectionBackgroundColor">#FAFAFA</Color>
+             <Color x:Key="LightSectionHeaderBackgroundColor">#E9E9E9</Color>
+             <Color x:Key="LightTextColor">#000000</Color>
+             <!-- DARK -->
+             <Color x:Key="DarkPageBackgroundColor">#000000</Color>
+             <Color x:Key="DarkSectionBackgroundColor">#333333</Color>
+             <Color x:Key="DarkSectionHeaderBackgroundColor">#1E1E1E</Color>
+             <Color x:Key="DarkTextColor">#FFFFFF</Color>
+ 
+             <Style x:Key="InfoLabel" TargetType="Label">
+                 <Setter Property="Padding" Value="10" />
+                 <Setter Property="FontSize" Value="14" />
+             </Style>
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <toolkit:EnumToBoolConverter x:Key="DownloadConverter">
+                <toolkit:EnumToBoolConverter.TrueValues>
+                    <app:DownloadStatus>NotDownloaded</app:DownloadStatus>
+                    <app:DownloadStatus>Downloaded</app:DownloadStatus>
+                    <app:DownloadStatus>Downloading</app:DownloadStatus>
+                </toolkit:EnumToBoolConverter.TrueValues>
+            </toolkit:EnumToBoolConverter>
+            <toolkit:EnumToBoolConverter x:Key="StatusConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
-     <ContentPage.Behaviors>
-        <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
- </ContentPage.Behaviors>
-     
-    <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+     <Shell.BackButtonBehavior>
+         <BackButtonBehavior IconOverride="arrow_back.png"/>
+     </Shell.BackButtonBehavior>
+    <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" RefreshColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightPageBackgroundColor}}" IsRefreshing="{Binding IsRefreshing}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="310">
-                <Label Text="Download Progress"  HorizontalOptions="Center"/>
-                <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Blue" ScaleX="2" ScaleY="3" >
-                     <ProgressBar.Behaviors>
-                         <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
-                     </ProgressBar.Behaviors>
-                 </ProgressBar>
-                <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
-            </StackLayout>
-               
-        <CollectionView Grid.Row="1" HorizontalScrollBarVisibility="Never"
-                VerticalScrollBarVisibility="Never"
-                ItemsSource="{Binding Shows}">
+            <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" WidthRequest="400">
+              <Label Text="Download Progress"  HorizontalOptions="Center"/>
+              <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor}, Light={StaticResource DarkSectionBackgroundColor}}" ScaleX="2" ScaleY="3" >
+                 <ProgressBar.Behaviors>
+                     <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
+                 </ProgressBar.Behaviors>
+             </ProgressBar>
+              <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
+          </StackLayout>
+        <CollectionView Grid.Row="1" 
+                        HorizontalScrollBarVisibility="Never"
+                        VerticalScrollBarVisibility="Never"
+                        ItemsSource="{Binding Shows}">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Vertical"
                     Span="{Binding Orientation}" />
             </CollectionView.ItemsLayout>
- 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Show">
-                        <Grid HorizontalOptions="Center">
-                        <Frame Background="White" 
-                            WidthRequest="300"
-                            HorizontalOptions="Center"
-                            CornerRadius="10">
-                                <StackLayout>
-                                    <Label 
-                                        Margin="10,0,10,0"
-                                        HorizontalOptions="Center"
-                                        Text="{Binding Title}" 
-                                        TextColor="Black" 
-                                        FontSize="Title" 
-                                        FontAttributes="Bold" />
-                                    <Image
-                                        Aspect="AspectFit"
-                                        WidthRequest="{OnIdiom Default=250}" 
-                                        HorizontalOptions="Center"
-                                        HeightRequest="200"
-                                        Margin="10,0,10,0">
+                        <Grid Padding="5">
+                         <Border StrokeThickness="4" Padding="16,8" HorizontalOptions="Center"  Stroke="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor}, Light={StaticResource DarkSectionBackgroundColor}}">
+                                 <Border.StrokeShape>
+                                     <RoundRectangle CornerRadius="20,20,20,20"/>
+                                 </Border.StrokeShape>
+                                <VerticalStackLayout>
+                                     <Border
+                                         Margin="5"
+                                         Stroke="Transparent"
+                                         StrokeThickness="0"
+                                         StrokeShape="RoundRectangle 10">
+                                     <Label Text="{Binding Title}"
+                                         FontSize="Title"
+                                         HorizontalOptions="Center"
+                                         Style="{StaticResource Headline}"
+                                         BackgroundColor="{AppThemeBinding Dark={StaticResource  DarkSectionHeaderBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
+                                         TextColor="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}"
+                                         FontAttributes="Bold"/>
+                                         </Border>
+                                    <Image Aspect="AspectFit"
+                                         WidthRequest="{OnIdiom Phone=300, Default=440}"
+                                         HorizontalOptions="Center">
                                         <Image.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=GotoVideoPageCommand}"
                                                                 CommandParameter="{Binding .}" />
@@ -86,10 +110,9 @@
                                         SemanticProperties.Description="download a show."
                                         Text="Download"
                                         TextColor="#FFFFFF"
-                                        IsVisible="{Binding IsDownloaded, Converter={StaticResource InvertedBoolConverter}}"
+                                        IsVisible="{Binding Status, Converter={StaticResource StatusConverter}, ConverterParameter={x:Static app:DownloadStatus.NotDownloaded}}"
                                         WidthRequest="{OnIdiom Phone=70,
                                                                 Default=100}">
-
                                     </Button>
                                     <Button
                                         Margin="5"
@@ -102,23 +125,29 @@
                                         HeightRequest="48"
                                         SemanticProperties.Description="cancel a current download."
                                         Text="Cancel"
-                                        IsVisible="{Binding IsDownloading}"
+                                        IsVisible="{Binding Status, Converter={StaticResource StatusConverter}, ConverterParameter={x:Static app:DownloadStatus.Downloading}}"
                                         TextColor="#FFFFFF"
                                         WidthRequest="{OnIdiom Phone=70,
                                                                 Default=100}">
                                     </Button>
-                                       
-                                    <WebView 
-                                            WidthRequest="{OnIdiom Default=250}" 
-                                            HeightRequest="1600"
-                                            Navigating="Webview_Navigating"
-                                            x:Name="webview">
-                                            <WebView.Source>
-                                                <HtmlWebViewSource Html="{Binding Description}" />
-                                            </WebView.Source>
-                                    </WebView>
-                                </StackLayout>
-                            </Frame>
+                                     <Border
+                                         Margin="5"
+                                         Stroke="Transparent"
+                                         StrokeThickness="0"
+                                         StrokeShape="RoundRectangle 10">
+                                    <Label 
+                                        HeightRequest="1500"
+                                        LineBreakMode="WordWrap"
+                                        Style="{StaticResource InfoLabel}"
+                                        TextType="Html"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding Description}" 
+                                        BackgroundColor="{AppThemeBinding Dark={StaticResource  DarkSectionHeaderBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
+                                        TextColor="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}"
+                                        FontSize="Body" />
+                                     </Border>
+                                </VerticalStackLayout>
+                            </Border>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -131,9 +160,12 @@
                             HorizontalOptions="Center"
                             HorizontalTextAlignment="Center"
                             Text="Loading..."
-                            TextColor="Black"
+                            IsVisible="{Binding IsRefreshing, Converter={StaticResource InvertedBoolConverter}}"
+                            Style="{StaticResource InfoLabel}"
+                            BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
+                            TextColor="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}"
                             VerticalOptions="Center" />
-                        <ActivityIndicator IsRunning="True" Color="Red" />
+                        <ActivityIndicator    IsVisible="{Binding IsRefreshing, Converter={StaticResource InvertedBoolConverter}}" IsRunning="True" Color="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}" />
                     </StackLayout>
                 </ContentView>
             </CollectionView.EmptyView>

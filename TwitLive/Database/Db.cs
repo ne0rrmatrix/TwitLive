@@ -37,14 +37,14 @@ public class Db : IDb
 		return await db.Table<Show>().ToListAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public async Task<Show> GetShowAsync(string title, CancellationToken cancellationToken = default)
+	public async Task<Show> GetShowAsync(Show show, CancellationToken cancellationToken = default)
 	{
 		await Init(cancellationToken).ConfigureAwait(false);
 		if (db is null)
 		{
 			return new Show();
 		}
-		return await db.Table<Show>().Where(i => i.Title == title).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		return await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
 	public async Task SaveShowAsync(Show show, CancellationToken cancellationToken = default)
@@ -54,7 +54,7 @@ public class Db : IDb
 		{
 			return;
 		}
-		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		var item = await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 		if (item is not null)
 		{
 			await db.DeleteAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -75,12 +75,14 @@ public class Db : IDb
 		{
 			return;
 		}
-		var item = await db.Table<Show>().Where(i => i.Title == show.Title).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		var item = await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 		if (item is null)
 		{
+			logger.Error("DB Entry not found!");
 			return;
 		}
-		await db.DeleteAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
+		await db.DeleteAsync(item).WaitAsync(cancellationToken).ConfigureAwait(false);
+		logger.Info($"DB Entry: {item.Title} Deleted!");
 	}
 
 	public async Task DeleteAllShows(CancellationToken cancellationToken = default)

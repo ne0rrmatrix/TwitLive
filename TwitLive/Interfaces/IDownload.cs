@@ -6,6 +6,7 @@ public interface IDownload
 {
 	public double Percentage { get; set; }
 	public List<Show> shows { get; set; }
-	public Task<DownloadStatus> DownloadAsync(Show show, CancellationToken token = default);
+	public Show CurrentShow { get; set; }
+	public Task<DownloadStatus> DownloadAsync(Show show, CancellationToken token);
 	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
 }
