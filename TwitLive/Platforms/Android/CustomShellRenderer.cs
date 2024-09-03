@@ -28,14 +28,11 @@ public class CustomShellRenderer : ShellRenderer
 		return new ShellItemRendererWorkaround(this);
 	}
 
-	sealed class ShellItemRendererWorkaround : ShellItemRenderer
+	sealed class ShellItemRendererWorkaround(IShellContext shellContext) : ShellItemRenderer(shellContext)
 	{
 		IMauiContext? MauiContext => ShellContext.Shell.Handler?.MauiContext;
 
 		BottomNavigationView? bottomView;
-		public ShellItemRendererWorkaround(IShellContext shellContext) : base(shellContext)
-		{
-		}
 
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
@@ -88,10 +85,8 @@ public class CustomShellRenderer : ShellRenderer
 
 		protected override void UpdateShellSectionTitle(ShellSection shellSection, IMenuItem menuItem)
 		{
-			using (var title = new Java.Lang.String(shellSection.Title))
-			{
-				menuItem.SetTitle(title);
-			}
+			using var title = new Java.Lang.String(shellSection.Title);
+			menuItem.SetTitle(title);
 		}
 
 		internal static async Task SetMenuItemIcon(IMenuItem? menuItem, ImageSource source, IMauiContext? context)
@@ -127,7 +122,6 @@ public class CustomShellRenderer : ShellRenderer
 
 	class ShellToolbarTrackerWorkaround : ShellToolbarTracker
 	{
-		readonly DrawerLayout drawerLayout;
 
 		public static ShellToolbarTrackerWorkaround? Current { get; set; }
 
@@ -146,23 +140,17 @@ public class CustomShellRenderer : ShellRenderer
 			{
 				Current.TintColor = Color.FromArgb("#FFFFFF");
 			}
-			this.drawerLayout = drawerLayout;
 		}
 	}
 
-	class ShellSectionRendererWorkaround : ShellSectionRenderer
+	class ShellSectionRendererWorkaround(IShellContext shellContext) : ShellSectionRenderer(shellContext)
 	{
 		bool selecting;
-		readonly IShellContext shellContext;
+		readonly IShellContext shellContext = shellContext;
 		public ShellToolbarTrackerWorkaround? ToolbarTracker { get; set; }
 		ViewPager2? viewPager;
 		IShellSectionController SectionController => (IShellSectionController)ShellSection;
 		IShellController ShellController => shellContext.Shell;
-
-		public ShellSectionRendererWorkaround(IShellContext shellContext) : base(shellContext)
-		{
-			this.shellContext = shellContext;
-		}
 
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{

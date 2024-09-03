@@ -75,11 +75,7 @@
                                     <RoundRectangle CornerRadius="20,20,20,20" />
                                 </Border.StrokeShape>
                                 <VerticalStackLayout>
-                                    <Label
-                                        FontAttributes="Bold"
-                                        FontSize="Title"
-                                        Style="{StaticResource TitleLabel}"
-                                        Text="{Binding Title}" />
+                                    <Label Style="{StaticResource TitleLabel}" Text="{Binding Title}" />
                                     <Image
                                         Aspect="AspectFit"
                                         HorizontalOptions="Center"
@@ -131,7 +127,6 @@
                                             <RoundRectangle CornerRadius="20,20,20,20" />
                                         </Border.StrokeShape>
                                         <Label
-                                            FontSize="Body"
                                             HeightRequest="1500"
                                             Style="{StaticResource InfoLabel}"
                                             Text="{Binding Description}"

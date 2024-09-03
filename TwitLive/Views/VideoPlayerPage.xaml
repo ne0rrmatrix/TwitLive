@@ -58,10 +58,7 @@
                     <RoundRectangle CornerRadius="20,20,20,20" />
                 </Border.StrokeShape>
                 <VerticalStackLayout Padding="10">
-                    <Label
-                        FontAttributes="Bold"
-                        Style="{StaticResource TitleLabel}"
-                        Text="{Binding Show.Title}" />
+                    <Label Style="{StaticResource TitleLabel}" Text="{Binding Show.Title}" />
                     <toolkit:MediaElement
                         x:Name="mediaElement"
                         Margin="10,10,10,10"

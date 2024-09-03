@@ -45,6 +45,8 @@
             </Style>
             <Style x:Key="TitleLabel" TargetType="Label">
                 <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="FontSize" Value="Title" />
+                <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightPageBackgroundColor}}" />
                 <Setter Property="TextColor" Value="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}" />
                 <Setter Property="FontSize" Value="Title" />

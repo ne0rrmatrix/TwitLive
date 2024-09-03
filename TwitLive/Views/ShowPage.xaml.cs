@@ -10,11 +10,4 @@ public partial class ShowPage : ContentPage
 		InitializeComponent();
 		BindingContext = viewModel;
 	}
-	void Webview_Navigating(System.Object sender, Microsoft.Maui.Controls.WebNavigatingEventArgs e)
-	{
-		if (e.Url.Contains("https://") || e.Url.Contains("http://"))
-		{
-			e.Cancel = true;
-		}
-	}
 }
