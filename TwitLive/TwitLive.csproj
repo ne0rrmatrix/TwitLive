@@ -64,6 +64,7 @@
 		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="4.1.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="MetroLog.Maui" Version="2.1.0" />
+    <PackageReference Include="FFImageLoading.Maui" Version="1.2.7" />
 		<PackageReference Include="System.Drawing.Common" Version="8.0.8" />
    <PackageReference Include="System.ServiceModel.Syndication" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />

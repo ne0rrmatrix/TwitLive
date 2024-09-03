@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
+using FFImageLoading.Maui;
 using MetroLog;
 using MetroLog.Operators;
 using MetroLog.Targets;
@@ -24,6 +25,7 @@ public static class MauiProgram
 		builder
 			.UseMauiCommunityToolkitMediaElement()
 			.UseMauiCommunityToolkitCore()
+			.UseFFImageLoading()
 			.UseMauiCommunityToolkit(options =>
 			{
 				options.SetShouldEnableSnackbarOnWindows(true);

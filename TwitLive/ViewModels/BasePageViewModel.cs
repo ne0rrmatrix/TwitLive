@@ -32,6 +32,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		Orientation = IdiomOrientation.Span;
 		OnPropertyChanged(nameof(Orientation));
 		ArgumentNullException.ThrowIfNull(App.Download);
+		DeviceDisplay.Current.MainDisplayInfoChanged += DeviceDisplayMainDisplayInfoChanged;
 		App.Download.ProgressChanged += Progress_ProgressChanged;
 	}
 
