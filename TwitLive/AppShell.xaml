@@ -6,18 +6,27 @@
     xmlns:local="clr-namespace:TwitLive.Views"
     Shell.BackgroundColor="#34AAD2"
     Shell.TabBarIsVisible="True">
-    
+
     <TabBar>
-       <Tab Title="Home" Route="Home" Icon="home.png">
+        <Tab
+            Title="Home"
+            Icon="home.png"
+            Route="Home">
             <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" />
         </Tab>
-        <Tab Title="VideoPlayer" Route="VideoPlayerPage" Icon="videoplayer.png">
+        <Tab
+            Title="VideoPlayer"
+            Icon="videoplayer.png"
+            Route="VideoPlayerPage">
             <ShellContent ContentTemplate="{DataTemplate local:VideoPlayerPage}" />
         </Tab>
-        <Tab Title="Downloads" Route="DownloadsPage" Icon="download.png">
+        <Tab
+            Title="Downloads"
+            Icon="download.png"
+            Route="DownloadsPage">
             <ShellContent ContentTemplate="{DataTemplate local:DownloadsPage}" />
         </Tab>
     </TabBar>
-    
+
     <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" Route="MainPage" />
 </Shell>

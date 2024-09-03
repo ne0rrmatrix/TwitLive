@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.Messaging;
 using TwitLive.Primitives;
 using TwitLive.Views;
 
@@ -16,9 +17,21 @@ public partial class AppShell : Shell
 
 	protected override void OnNavigated(ShellNavigatedEventArgs args)
 	{
+		base.OnNavigated(args);
+#if IOS || ANDROID || MACCATALYST
+		if (Application.Current?.PlatformAppTheme == AppTheme.Dark)
+		{
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Colors.Black);
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.LightContent);
+		}
+		else
+		{
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Color.FromArgb("#E9E9E9"));
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.DarkContent);
+		}
+#endif
 		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, null));
 		System.Diagnostics.Debug.WriteLine($"Navigated to {args.Current.Location}");
-		base.OnNavigated(args);
 	}
 
 #if ANDROID

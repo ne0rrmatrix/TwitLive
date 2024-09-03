@@ -1,5 +1,4 @@
 using System.Timers;
-using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.Messaging;
 using MetroLog;
 using TwitLive.Interfaces;
@@ -23,22 +22,6 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 		InitializeComponent();
 		BindingContext = viewModel;
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
-	}
-	protected override void OnNavigatedTo(NavigatedToEventArgs args)
-	{
-		base.OnNavigatedTo(args);
-#if IOS || ANDROID || MACCATALYST
-		if (Application.Current?.PlatformAppTheme == AppTheme.Dark)
-		{
-			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Colors.Black);
-			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.LightContent);
-		}
-		else
-		{
-			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Color.FromArgb("#E9E9E9"));
-			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.DarkContent);
-		}
-#endif
 	}
 	void HandleMessage(NavigationMessage message)
 	{

@@ -1,104 +1,92 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             x:Class="TwitLive.Views.VideoPlayerPage"
-             xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
-             xmlns:app="clr-namespace:TwitLive.Primitives"
-             xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
-             xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
-             xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
-             x:DataType="viewModel:VideoPlayerViewModel"
-             ios:Page.UseSafeArea="False"
-             Shell.NavBarIsVisible="False"
-             BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
-             Shell.BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}">
-     <ContentPage.Resources>
-     <ResourceDictionary>
-          <!-- LIGHT -->
-          <Color x:Key="LightPageBackgroundColor">#FFFFFF</Color>
-          <Color x:Key="LightSectionBackgroundColor">#FAFAFA</Color>
-          <Color x:Key="LightSectionHeaderBackgroundColor">#E9E9E9</Color>
-          <Color x:Key="LightTextColor">#000000</Color>
- 
-          <!-- DARK -->
-          <Color x:Key="DarkPageBackgroundColor">#000000</Color>
-          <Color x:Key="DarkSectionBackgroundColor">#333333</Color>
-          <Color x:Key="DarkSectionHeaderBackgroundColor">#1E1E1E</Color>
-          <Color x:Key="DarkTextColor">#FFFFFF</Color>
- 
-          <Style x:Key="InfoLabel" TargetType="Label">
-              <Setter Property="Padding" Value="10" />
-              <Setter Property="WidthRequest" Value="{OnIdiom Phone=310, Default=630}" />
-              <Setter Property="FontSize" Value="14" />
-          </Style>
-          <Style x:Key="WebLabel" TargetType="WebView">
-              <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightPageBackgroundColor}}" />
-             <Setter Property="WidthRequest" Value="{OnIdiom Phone=310, Default=630}" />
-         </Style>
-         <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
-         <toolkit:EnumToBoolConverter x:Key="DownloadConverter">
-             <toolkit:EnumToBoolConverter.TrueValues>
-                 <app:DownloadStatus>NotDownloaded</app:DownloadStatus>
-                 <app:DownloadStatus>Downloaded</app:DownloadStatus>
-                 <app:DownloadStatus>Downloading</app:DownloadStatus>
-             </toolkit:EnumToBoolConverter.TrueValues>
-         </toolkit:EnumToBoolConverter>
-         <toolkit:EnumToBoolConverter x:Key="StatusConverter"/>
-     </ResourceDictionary>
- </ContentPage.Resources>
+<ContentPage
+    x:Class="TwitLive.Views.VideoPlayerPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:TwitLive.Primitives"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+    xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
+    ios:Page.UseSafeArea="False"
+    x:DataType="viewModel:VideoPlayerViewModel"
+    BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                      Light={StaticResource LightPageBackgroundColor}}"
+    Shell.BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                            Light={StaticResource LightPageBackgroundColor}}"
+    Shell.NavBarIsVisible="False">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <toolkit:EnumToBoolConverter x:Key="DownloadConverter">
+                <toolkit:EnumToBoolConverter.TrueValues>
+                    <app:DownloadStatus>NotDownloaded</app:DownloadStatus>
+                    <app:DownloadStatus>Downloaded</app:DownloadStatus>
+                    <app:DownloadStatus>Downloading</app:DownloadStatus>
+                </toolkit:EnumToBoolConverter.TrueValues>
+            </toolkit:EnumToBoolConverter>
+            <toolkit:EnumToBoolConverter x:Key="StatusConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <Grid HorizontalOptions="Center">
-       <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="300">
-            <Label Text="Download Progress"  HorizontalOptions="Center"/>
-            <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Blue" ScaleX="2" ScaleY="3" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackLayout
+            Grid.Row="0"
+            IsVisible="{Binding IsBusy}"
+            WidthRequest="{OnIdiom Phone=200,
+                                   Default=640}">
+            <Label HorizontalOptions="Center" Text="Download Progress" />
+            <ProgressBar
+                Progress="{Binding PercentagBar}"
+                ProgressColor="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor},
+                                                Light={StaticResource DarkSectionBackgroundColor}}"
+                ScaleX="2"
+                ScaleY="3">
                 <ProgressBar.Behaviors>
-                    <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
+                    <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}" />
                 </ProgressBar.Behaviors>
             </ProgressBar>
-            <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
-       </StackLayout>
-       <ScrollView>
-            <Border StrokeThickness="4" Padding="16,8" HorizontalOptions="Center"  Stroke="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor}, Light={StaticResource DarkPageBackgroundColor}}">
-                 <Border.StrokeShape>
-                     <RoundRectangle CornerRadius="20,20,20,20"/>
-                 </Border.StrokeShape>
-                <VerticalStackLayout>
-                     <Border
-                         Margin="5"
-                         Stroke="Transparent"
-                         StrokeThickness="0"
-                         StrokeShape="RoundRectangle 10">
-                     <Label Text="{Binding Show.Title}"
-                         FontSize="Title"
-                         HorizontalOptions="Center"
-                         Style="{StaticResource Headline}"
-                         BackgroundColor="{AppThemeBinding Dark={StaticResource  DarkSectionHeaderBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
-                         TextColor="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}"
-                         FontAttributes="Bold"/>
-                         </Border>
-                    <toolkit:MediaElement 
-                        HorizontalOptions="Center"
-                        Margin="10,10,10,10" 
+            <Label HorizontalOptions="Center" Text="{Binding PercentageLabel}" />
+        </StackLayout>
+        <ScrollView Grid.Row="1">
+            <Border Style="{x:StaticResource BorderStyle}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20,20,20,20" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Padding="10">
+                    <Label
+                        FontAttributes="Bold"
+                        Style="{StaticResource TitleLabel}"
+                        Text="{Binding Show.Title}" />
+                    <toolkit:MediaElement
                         x:Name="mediaElement"
-                        MetadataArtist="{Binding Show.PubDate}"
-                        MetadataTitle="{Binding Show.Title}"
-                        MetadataArtworkUrl="{Binding Show.Image}"
-                        WidthRequest="{OnIdiom Phone=320, Default=640}" 
-                        HeightRequest="{OnIdiom Phone=240, Default=320}" 
-                        Source="{Binding Show.Url}" 
-                        ShouldAutoPlay="True" 
-                        ShouldKeepScreenOn="True" />                                 
-                    <Label 
-                        LineBreakMode="WordWrap"
-                        Style="{StaticResource InfoLabel}"
-                        TextType="Html"
+                        Margin="10,10,10,10"
+                        HeightRequest="{OnIdiom Phone=240,
+                                                Default=320}"
                         HorizontalOptions="Center"
-                        Text="{Binding Show.Description}" 
-                        BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionHeaderBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}"
-                        TextColor="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}"
-                        FontSize="Body" />
+                        MetadataArtist="{Binding Show.PubDate}"
+                        MetadataArtworkUrl="{Binding Show.Image}"
+                        MetadataTitle="{Binding Show.Title}"
+                        ShouldAutoPlay="True"
+                        ShouldKeepScreenOn="True"
+                        Source="{Binding Show.Url}"
+                        WidthRequest="{OnIdiom Phone=320,
+                                               Default=640}" />
+                    <Border Style="{x:StaticResource LabelStyle}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="20,20,20,20" />
+                        </Border.StrokeShape>
+                        <Label
+                            Style="{StaticResource InfoLabel}"
+                            Text="{Binding Show.Description}"
+                            TextType="Html" />
+                    </Border>
                 </VerticalStackLayout>
             </Border>
-       </ScrollView>
+        </ScrollView>
     </Grid>
 </ContentPage>
