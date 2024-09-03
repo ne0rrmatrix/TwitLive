@@ -42,7 +42,7 @@
                 Padding="5,5,5,5"
                 IsVisible="{Binding IsBusy}"
                 WidthRequest="{OnIdiom Phone=200,
-                                       Default=640}">
+                                       Default=410}">
                 <Label HorizontalOptions="Center" Text="Download Progress" />
                 <ProgressBar
                     Progress="{Binding PercentagBar}"
@@ -82,8 +82,8 @@
                                         Aspect="AspectFit"
                                         HorizontalOptions="Center"
                                         Source="{Binding Image}"
-                                        WidthRequest="{OnIdiom Phone=310,
-                                                               Default=640}">
+                                        WidthRequest="{OnIdiom Phone=300,
+                                                               Default=340}">
                                         <ffimage:CachedImage.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}, Path=GotoShowPageCommand}" CommandParameter="{Binding .}" />
                                         </ffimage:CachedImage.GestureRecognizers>
