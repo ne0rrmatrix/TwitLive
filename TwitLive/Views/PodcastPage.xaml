@@ -37,6 +37,8 @@
             </Grid.RowDefinitions>
             <StackLayout
                 Grid.Row="0"
+                Margin="10"
+                Padding="5,5,5,5"
                 IsVisible="{Binding IsBusy}"
                 WidthRequest="{OnIdiom Phone=200,
                                        Default=640}">
@@ -51,10 +53,14 @@
                         <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}" />
                     </ProgressBar.Behaviors>
                 </ProgressBar>
-                <Label HorizontalOptions="Center" Text="{Binding PercentageLabel}" />
+                <Label
+                    Padding="5"
+                    HorizontalOptions="Center"
+                    Text="{Binding PercentageLabel}" />
             </StackLayout>
             <CollectionView
                 Grid.Row="1"
+                Margin="10"
                 HorizontalScrollBarVisibility="Never"
                 ItemsSource="{Binding Podcasts}"
                 VerticalScrollBarVisibility="Never">
