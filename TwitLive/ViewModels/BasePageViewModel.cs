@@ -53,31 +53,13 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 
 	public record struct GetDispatcher
 	{
-		public static IDispatcher? Dispatcher
-		{
-			get
-			{
-				return Application.Current?.Dispatcher;
-			}
-		}
+		public static IDispatcher Dispatcher => Application.Current?.Dispatcher ?? throw new FormatException("Dispatcher is not found.");
 	}
 
 	public record struct IdiomOrientation
 	{
-		public static DeviceIdiom Idiom
-		{
-			get
-			{
-				return DeviceInfo.Current.Idiom;
-			}
-		}
-		public static DisplayOrientation Orientation
-		{
-			get
-			{
-				return DeviceDisplay.Current.MainDisplayInfo.Orientation;
-			}
-		}
+		public static DeviceIdiom Idiom => DeviceInfo.Current.Idiom;
+		public static DisplayOrientation Orientation => DeviceDisplay.Current.MainDisplayInfo.Orientation;
 		public static int Span
 		{
 			get
@@ -107,6 +89,20 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		}
 	}
 
+	public void Progress_ProgressChanged(object? sender, DownloadProgressEventArgs e)
+	{
+		ArgumentNullException.ThrowIfNull(App.Download);
+		GetDispatcher.Dispatcher?.Dispatch(() =>
+		{
+			double temp = e.Percentage;
+			PercentagBar = temp / 100;
+			IsBusy = true;
+			PercentageLabel = $"Percent done: {temp}%";
+			OnPropertyChanged(nameof(PercentageLabel));
+			OnPropertyChanged(nameof(IsBusy));
+		});
+	}
+
 	protected virtual void Dispose(bool disposing)
 	{
 		if (!disposedValue)
@@ -123,20 +119,6 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 			}
 			disposedValue = true;
 		}
-	}
-
-	public void Progress_ProgressChanged(object? sender, DownloadProgressEventArgs e)
-	{
-		ArgumentNullException.ThrowIfNull(App.Download);
-		GetDispatcher.Dispatcher?.Dispatch(() => 
-		{ 
-			double temp = e.Percentage;
-			PercentagBar = temp/100;
-			IsBusy = true;
-			PercentageLabel = $"Percent done: {temp}%";
-			OnPropertyChanged(nameof(PercentageLabel));
-			OnPropertyChanged(nameof(IsBusy));
-		});
 	}
 
 	~BasePageViewModel()

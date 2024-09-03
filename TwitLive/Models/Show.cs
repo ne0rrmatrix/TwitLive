@@ -6,7 +6,7 @@ namespace TwitLive.Models;
 public partial class Show : Shared, IDisposable
 {
 	[PrimaryKey, AutoIncrement, Column("Id")]
-	public int ID { get; set; }
+	public int Id { get; set; }
 	bool disposedValue;
 	CancellationTokenSource cancellationTokenSource = new();
 	[Ignore]
@@ -15,6 +15,7 @@ public partial class Show : Shared, IDisposable
 		get => cancellationTokenSource;
 		set => SetProperty(ref cancellationTokenSource, value);
 	}
+	
 	int position;
 	public int Position
 	{
@@ -27,24 +28,11 @@ public partial class Show : Shared, IDisposable
 		get => fileName;
 		set => SetProperty(ref fileName, value);
 	}
-	bool isDownloaded = false;
-	public bool IsDownloaded
-	{
-		get => isDownloaded;
-		set => SetProperty(ref isDownloaded, value);
-	}
-	bool isDownloading = false;
-	public bool IsDownloading
-	{
-		get => isDownloading;
-		set => SetProperty(ref isDownloading, value);
-	}
-	DownloadStatus status = DownloadStatus.NotDownloaded;
-	[Ignore]
+	int status;
 	public DownloadStatus Status
 	{
-		get => status;
-		set => SetProperty(ref status, value);
+		get => (DownloadStatus)Enum.ToObject(typeof(DownloadStatus), status);
+		set => SetProperty(ref status, (int)value);
 	}
 	protected virtual void Dispose(bool disposing)
 	{
@@ -60,7 +48,7 @@ public partial class Show : Shared, IDisposable
 
 	~Show()
 	{
-	     Dispose(disposing: false);
+		Dispose(disposing: false);
 	}
 
 	public void Dispose()

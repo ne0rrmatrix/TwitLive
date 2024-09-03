@@ -1,14 +1,65 @@
-﻿<?xml version = "1.0" encoding = "UTF-8" ?>
-<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:TwitLive"
-             x:Class="TwitLive.App">
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Application
+    x:Class="TwitLive.App"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:TwitLive">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!--  LIGHT  -->
+            <Color x:Key="LightPageBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="LightSectionBackgroundColor">#FAFAFA</Color>
+            <Color x:Key="LightSectionHeaderBackgroundColor">#E9E9E9</Color>
+            <Color x:Key="LightTextColor">#000000</Color>
+
+            <!--  DARK  -->
+            <Color x:Key="DarkPageBackgroundColor">#979197</Color>
+            <Color x:Key="DarkSectionBackgroundColor">#1E1E1E</Color>
+            <Color x:Key="DarkSectionHeaderBackgroundColor">#554d56</Color>
+            <Color x:Key="DarkTextColor">#FFFFFF</Color>
+
+            <Style x:Key="ButtonStyle" TargetType="Button">
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="FontSize" Value="{OnIdiom Phone=8, Default=14}" />
+                <Setter Property="HeightRequest" Value="48" />
+                <Setter Property="TextColor" Value="#FFFFFF" />
+                <Setter Property="WidthRequest" Value="{OnIdiom Phone=70, Default=100}" />
+            </Style>
+            <Style x:Key="BorderStyle" TargetType="Border">
+                <Setter Property="Padding" Value="16,8" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="StrokeThickness" Value="4" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor}, Light={StaticResource DarkPageBackgroundColor}}" />
+            </Style>
+            <Style x:Key="LabelStyle" TargetType="Border">
+                <Setter Property="StrokeShape" Value="RoundRectangle" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="StrokeThickness" Value="0" />
+                <Setter Property="Stroke" Value="Transparent" />
+            </Style>
+            <Style x:Key="InfoLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="Body" />
+                <Setter Property="LineBreakMode" Value="WordWrap" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource DarkSectionHeaderBackgroundColor}, Light={StaticResource LightSectionHeaderBackgroundColor}}" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}" />
+                <Setter Property="FontSize" Value="Body" />
+            </Style>
+            <Style x:Key="TitleLabel" TargetType="Label">
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="FontSize" Value="Title" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor}, Light={StaticResource LightPageBackgroundColor}}" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Dark={StaticResource DarkTextColor}, Light={StaticResource LightTextColor}}" />
+                <Setter Property="FontSize" Value="Title" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

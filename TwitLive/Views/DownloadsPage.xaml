@@ -1,111 +1,122 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="TwitLive.Views.DownloadsPage"
-             xmlns:model="clr-namespace:TwitLive.Models"
-             xmlns:app="clr-namespace:TwitLive.Primitives"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
-             xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
-             xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
-             x:DataType="viewModel:DownloadsPageViewModel"
-             BackgroundColor="#34AAD2"
-             Shell.BackgroundColor="#34AAD2">
-        
-        <ContentPage.Resources>
+<ContentPage
+    x:Class="TwitLive.Views.DownloadsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:TwitLive.Primitives"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+    xmlns:model="clr-namespace:TwitLive.Models"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+    xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
+    x:DataType="viewModel:DownloadsPageViewModel"
+    BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                      Light={StaticResource LightPageBackgroundColor}}"
+    Shell.BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                            Light={StaticResource LightPageBackgroundColor}}">
+    <ContentPage.Resources>
         <ResourceDictionary>
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <toolkit:EnumToBoolConverter x:Key="DownloadConverter">
+                <toolkit:EnumToBoolConverter.TrueValues>
+                    <app:DownloadStatus>Downloaded</app:DownloadStatus>
+                    <app:DownloadStatus>NotDownloaded</app:DownloadStatus>
+                    <app:DownloadStatus>Downloading</app:DownloadStatus>
+                </toolkit:EnumToBoolConverter.TrueValues>
+            </toolkit:EnumToBoolConverter>
+            <toolkit:EnumToBoolConverter x:Key="StatusConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
-    <ContentPage.Behaviors>
-            <mct:StatusBarBehavior StatusBarColor="#34AAD2" StatusBarStyle="LightContent" />
-    </ContentPage.Behaviors>
-     
-    <RefreshView windows:RefreshView.RefreshPullDirection="TopToBottom" Command="{Binding PullToRefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+    <RefreshView
+        windows:RefreshView.RefreshPullDirection="TopToBottom"
+        Command="{Binding PullToRefreshCommand}"
+        IsRefreshing="{Binding IsRefreshing}"
+        RefreshColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                       Light={StaticResource LightPageBackgroundColor}}">
         <Grid>
-             <Grid.RowDefinitions>
-                 <RowDefinition Height="Auto" />
-                 <RowDefinition Height="*" />
-             </Grid.RowDefinitions>
-              <StackLayout IsVisible="{Binding IsBusy}" Grid.Row="0" Spacing="10" Padding="20" WidthRequest="310">
-                  <Label Text="Download Progress"  HorizontalOptions="Center"/>
-                  <ProgressBar Progress="{Binding PercentagBar}" ProgressColor="Blue" ScaleX="2" ScaleY="3" >
-                     <ProgressBar.Behaviors>
-                         <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}"/>
-                     </ProgressBar.Behaviors>
-                 </ProgressBar>
-                  <Label Text="{Binding PercentageLabel}" HorizontalOptions="Center"/>
-              </StackLayout>
-            
-            <CollectionView Grid.Row="1" HorizontalScrollBarVisibility="Never"
-                 VerticalScrollBarVisibility="Never"
-                 ItemsSource="{Binding Shows}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackLayout
+                Grid.Row="0"
+                Margin="10"
+                Padding="5,5,5,5"
+                IsVisible="{Binding IsBusy}"
+                WidthRequest="{OnIdiom Phone=200,
+                                       Default=640}">
+                <Label HorizontalOptions="Center" Text="Download Progress" />
+                <ProgressBar
+                    Progress="{Binding PercentagBar}"
+                    ProgressColor="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor},
+                                                    Light={StaticResource DarkSectionBackgroundColor}}"
+                    ScaleX="2"
+                    ScaleY="3">
+                    <ProgressBar.Behaviors>
+                        <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}" />
+                    </ProgressBar.Behaviors>
+                </ProgressBar>
+                <Label
+                    Padding="5"
+                    HorizontalOptions="Center"
+                    Text="{Binding PercentageLabel}" />
+            </StackLayout>
+            <CollectionView
+                Grid.Row="1"
+                Margin="10"
+                HorizontalScrollBarVisibility="Never"
+                ItemsSource="{Binding Shows}"
+                VerticalScrollBarVisibility="Never">
                 <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical"
-                        Span="{Binding Orientation}" />
+                    <GridItemsLayout Orientation="Vertical" Span="{Binding Orientation}" />
                 </CollectionView.ItemsLayout>
- 
-                 <CollectionView.ItemTemplate>
-                     <DataTemplate x:DataType="model:Show">
-                         <Grid HorizontalOptions="Center">
-                          <Frame Background="White" 
-                                WidthRequest="300"
-                                HorizontalOptions="Center"
-                                CornerRadius="10">
-                                  <StackLayout>
-                                       <Label 
-                                          Margin="10,0,10,0"
-                                          HorizontalOptions="Center"
-                                          Text="{Binding Title}" 
-                                          TextColor="Black" 
-                                          FontSize="Title" 
-                                          FontAttributes="Bold" />
-                                        <Image
-                                          Aspect="AspectFit"
-                                          WidthRequest="{OnIdiom 250}" 
-                                          HorizontalOptions="Center"
-                                          HeightRequest="200"
-                                          Margin="10,0,10,0">
-                                          <Image.GestureRecognizers>
-                                              <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=GotoVideoPageCommand}"
-                                                                  CommandParameter="{Binding .}" />
-                                          </Image.GestureRecognizers>
-                                            <Image.Source>
-                                                <UriImageSource Uri="{Binding Image}" CachingEnabled="True"  CacheValidity="10:00:00:00" />
-                                            </Image.Source>
-                                        </Image>
-                                        <Button
-                                            Margin="5"
-                                            BackgroundColor="Red"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=DeleteShowCommand}"
-                                            CommandParameter="{Binding .}"
-                                            FontAttributes="Bold"
-                                            IsEnabled="True"
-                                            FontSize="{OnIdiom Phone=8,
-                                                               Default=14}"
-                                            HeightRequest="48"
-                                            SemanticProperties.Description="download a show."
-                                            Text="Delete"
-                                            TextColor="#FFFFFF"
-                                            WidthRequest="{OnIdiom Phone=70,
-                                                                   Default=100}">
 
-                                        </Button>
-                                       <WebView 
-                                             WidthRequest="{OnIdiom Default=250}" 
-                                             HeightRequest="1600"
-                                             Navigating="Webview_Navigating"
-                                             x:Name="webview">
-                                             <WebView.Source>
-                                                 <HtmlWebViewSource Html="{Binding Description}" />
-                                             </WebView.Source>
-                                       </WebView>
-                                 </StackLayout>
-                              </Frame>
-                         </Grid>
-                     </DataTemplate>
-                 </CollectionView.ItemTemplate>
-     </CollectionView>
-            </Grid>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Show">
+                        <Grid Padding="5">
+                            <Border Style="{x:StaticResource BorderStyle}">
+                                <VerticalStackLayout>
+                                    <Label Style="{StaticResource TitleLabel}" Text="{Binding Title}" />
+                                    <Image
+                                        Aspect="AspectFit"
+                                        HorizontalOptions="Center"
+                                        WidthRequest="{OnIdiom Phone=300,
+                                                               Default=440}">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=GotoVideoPageCommand}" CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                        <Image.Source>
+                                            <UriImageSource
+                                                CacheValidity="10:00:00:00"
+                                                CachingEnabled="True"
+                                                Uri="{Binding Image}" />
+                                        </Image.Source>
+                                    </Image>
+                                    <Button
+                                        BackgroundColor="Red"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=DeleteShowCommand}"
+                                        CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Status, Converter={StaticResource StatusConverter}, ConverterParameter={x:Static app:DownloadStatus.Downloaded}}"
+                                        SemanticProperties.Description="download a show."
+                                        Style="{x:StaticResource ButtonStyle}"
+                                        Text="Delete" />
+                                    <Border Style="{x:StaticResource LabelStyle}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="20,20,20,20" />
+                                        </Border.StrokeShape>
+                                        <Label
+                                            HeightRequest="1500"
+                                            Style="{StaticResource InfoLabel}"
+                                            Text="{Binding Description}"
+                                            TextType="Html" />
+                                    </Border>
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
     </RefreshView>
 </ContentPage>

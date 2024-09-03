@@ -9,7 +9,7 @@
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   IgnorableNamespaces="uap rescap uap3 com desktop">
 
-  <Identity Name="TwitPodcasts" Publisher="CN=User Name" Version="0.0.1.0" />
+  <Identity Name="TwitPodcasts" Publisher="CN=User Name" Version="0.0.3.0" />
 
   <mp:PhoneIdentity PhoneProductId="DC569483-91F7-40E6-B7F4-D59AFB517FC9" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

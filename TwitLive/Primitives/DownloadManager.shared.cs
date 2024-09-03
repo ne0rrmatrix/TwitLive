@@ -19,24 +19,32 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
 	protected virtual void OnProgressChanged(DownloadProgressEventArgs e) => ProgressChanged?.Invoke(this, e);
 	public List<Show> shows { get; set; }
+	public Show CurrentShow
+	{
+		get => currentShow;
+		set => SetProperty(ref currentShow, value);
+	}
+	Show currentShow;
 	IDb db { get; set; }
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(DownloadManager));
 
 	public DownloadManager(IDb db)
 	{
 		shows = [];
+		currentShow = new();
 		this.db = db;
 		cancellationToken = new();
 		client ??= new HttpClient();
 	}
 
-	public async Task<DownloadStatus> DownloadAsync(Show show, CancellationToken token = default)
+	public async Task<DownloadStatus> DownloadAsync(Show show, CancellationToken token)
 	{
 		var file = FileService.GetFileName(show.Url);
 		ArgumentNullException.ThrowIfNull(file);
 		ArgumentNullException.ThrowIfNull(client);
 		try
 		{
+			CurrentShow = show;
 			var response = await client.GetAsync(show.Url, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
 			var total = response.Content.Headers.ContentLength ?? -1L;
 			using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
@@ -46,11 +54,6 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 			var totalRead = 0L;
 			do
 			{
-				if(token.IsCancellationRequested)
-				{
-					logger.Info("Closing output");
-					output.Close();
-				}
 				var read = await stream.ReadAsync(buffer, token).ConfigureAwait(false);
 				if (read == 0)
 				{
@@ -75,27 +78,24 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 			} while (isMoreToRead);
 
 			output.Close();
-			this.shows.Remove(show);
 			Percentage = 0;
+			CurrentShow = new();
 			PercentageLabel = string.Empty;
+			this.shows.Remove(show);
 			logger.Info("Download complete");
-			
+			currentShow = new();
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Downloaded, Percentage));
+			return DownloadStatus.Downloaded;
 		}
 		catch
 		{
-			var item = shows.Find(x => x.Url == show.Url);
-			if (item is not null)
-			{
-				logger.Info("Removing show from current downloads list");
-				shows.Remove(item);
-				OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Cancelled, 0));
-			}
 			Percentage = 0;
 			PercentageLabel = string.Empty;
-			return DownloadStatus.Cancelled;
+			CurrentShow = new();
+			this.shows.Remove(show);
+			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.NotDownloaded, 0));
+			return DownloadStatus.NotDownloaded;
 		}
-		return DownloadStatus.Downloaded;
 	}
 
 	protected virtual void Dispose(bool disposing)

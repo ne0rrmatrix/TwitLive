@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.Messaging;
 using TwitLive.Primitives;
 using TwitLive.Views;
 
@@ -16,9 +17,26 @@ public partial class AppShell : Shell
 
 	protected override void OnNavigated(ShellNavigatedEventArgs args)
 	{
-		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, null, null));
-		System.Diagnostics.Debug.WriteLine($"Navigated to {args.Current.Location}");
 		base.OnNavigated(args);
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable CA1416 // Validate platform compatibility
+#if IOS || ANDROID || MACCATALYST
+		if (Application.Current?.PlatformAppTheme == AppTheme.Dark)
+		{
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Colors.Black);
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.LightContent);
+		}
+		else
+		{
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(Color.FromArgb("#E9E9E9"));
+			CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(StatusBarStyle.DarkContent);
+		}
+
+#pragma warning restore CA1416 // Validate platform compatibility
+#pragma warning restore IDE0079 // Remove unnecessary suppression
+#endif
+		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, null));
+		System.Diagnostics.Debug.WriteLine($"Navigated to {args.Current.Location}");
 	}
 
 #if ANDROID

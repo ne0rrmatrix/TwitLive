@@ -13,17 +13,12 @@ public partial class PodcastPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
 	ObservableCollection<Podcast> podcasts;
-
-#pragma warning disable IDE0044
-	CancellationTokenSource cancellationToken;
-#pragma warning restore IDE0044
 	public PodcastPageViewModel()
 	{
-		cancellationToken = new();
 		podcasts = [];
 		ThreadPool.QueueUserWorkItem(async (state) =>
 		{
-			await LoadPodcasts(cancellationToken.Token);
+			await LoadPodcasts(CancellationToken.None);
 		});
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage(m));
 	}
@@ -69,21 +64,17 @@ public partial class PodcastPageViewModel : BasePageViewModel
 	{
 		Podcasts.Clear();
 		IsRefreshing = true;
-		IsBusy = true;
-		OnPropertyChanged(nameof(IsBusy));
 		OnPropertyChanged(nameof(IsRefreshing));
-		var item = await FeedService.GetPodcasts(cancellationToken.Token).ConfigureAwait(false);
+		var item = await FeedService.GetPodcasts(CancellationToken.None).ConfigureAwait(false);
+		
 		Podcasts = new ObservableCollection<Podcast>(item);
-		IsBusy = false;
 		IsRefreshing = false;
-		OnPropertyChanged(nameof(IsBusy));
 		OnPropertyChanged(nameof(IsRefreshing));
 	});
 
 	protected override void Dispose(bool disposing)
 	{
 		WeakReferenceMessenger.Default.Unregister<NavigationMessage>(this);
-		cancellationToken?.Dispose();
 		base.Dispose(disposing);
 	}
 }

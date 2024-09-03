@@ -149,6 +149,7 @@ public class FeedService : IDisposable
 
 				Show show = new()
 				{
+					Status = DownloadStatus.NotDownloaded,
 					Description = node.SelectSingleNode("description")?.InnerText ?? string.Empty,
 					PubDate = ConvertToDateTime(node.SelectSingleNode("pubDate")?.InnerText ?? string.Empty),
 					Title = node.SelectSingleNode("title")?.InnerText ?? string.Empty,
