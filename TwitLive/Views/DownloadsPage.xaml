@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:app="clr-namespace:TwitLive.Primitives"
+    xmlns:ffimage="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
     xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
     xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
     xmlns:model="clr-namespace:TwitLive.Models"
@@ -45,7 +46,7 @@
                 Padding="5,5,5,5"
                 IsVisible="{Binding IsBusy}"
                 WidthRequest="{OnIdiom Phone=200,
-                                       Default=640}">
+                                       Default=410}">
                 <Label HorizontalOptions="Center" Text="Download Progress" />
                 <ProgressBar
                     Progress="{Binding PercentagBar}"
@@ -78,21 +79,16 @@
                             <Border Style="{x:StaticResource BorderStyle}">
                                 <VerticalStackLayout>
                                     <Label Style="{StaticResource TitleLabel}" Text="{Binding Title}" />
-                                    <Image
+                                    <ffimage:CachedImage
                                         Aspect="AspectFit"
                                         HorizontalOptions="Center"
+                                        Source="{Binding Image}"
                                         WidthRequest="{OnIdiom Phone=300,
-                                                               Default=440}">
-                                        <Image.GestureRecognizers>
+                                                               Default=340}">
+                                        <ffimage:CachedImage.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=GotoVideoPageCommand}" CommandParameter="{Binding .}" />
-                                        </Image.GestureRecognizers>
-                                        <Image.Source>
-                                            <UriImageSource
-                                                CacheValidity="10:00:00:00"
-                                                CachingEnabled="True"
-                                                Uri="{Binding Image}" />
-                                        </Image.Source>
-                                    </Image>
+                                        </ffimage:CachedImage.GestureRecognizers>
+                                    </ffimage:CachedImage>
                                     <Button
                                         BackgroundColor="Red"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=DeleteShowCommand}"
