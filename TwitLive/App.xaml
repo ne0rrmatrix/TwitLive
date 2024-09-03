@@ -23,6 +23,15 @@
             <Color x:Key="DarkSectionHeaderBackgroundColor">#554d56</Color>
             <Color x:Key="DarkTextColor">#FFFFFF</Color>
 
+            <Style x:Key="ButtonStyle" TargetType="Button">
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="FontSize" Value="{OnIdiom Phone=8, Default=14}" />
+                <Setter Property="HeightRequest" Value="48" />
+                <Setter Property="TextColor" Value="#FFFFFF" />
+                <Setter Property="WidthRequest" Value="{OnIdiom Phone=70, Default=100}" />
+            </Style>
             <Style x:Key="BorderStyle" TargetType="Border">
                 <Setter Property="Padding" Value="16,8" />
                 <Setter Property="HorizontalOptions" Value="Center" />

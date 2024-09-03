@@ -42,7 +42,8 @@
             <StackLayout
                 Grid.Row="0"
                 IsVisible="{Binding IsBusy}"
-                WidthRequest="400">
+                WidthRequest="{OnIdiom Phone=200,
+                                       Default=640}">
                 <Label HorizontalOptions="Center" Text="Download Progress" />
                 <ProgressBar
                     Progress="{Binding PercentagBar}"
@@ -87,20 +88,13 @@
                                         </Image.Source>
                                     </Image>
                                     <Button
-                                        Margin="5"
                                         BackgroundColor="Red"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}, Path=DeleteShowCommand}"
                                         CommandParameter="{Binding .}"
-                                        FontAttributes="Bold"
-                                        FontSize="{OnIdiom Phone=8,
-                                                           Default=14}"
-                                        HeightRequest="48"
                                         IsVisible="{Binding Status, Converter={StaticResource StatusConverter}, ConverterParameter={x:Static app:DownloadStatus.Downloaded}}"
                                         SemanticProperties.Description="download a show."
-                                        Text="Delete"
-                                        TextColor="#FFFFFF"
-                                        WidthRequest="{OnIdiom Phone=70,
-                                                               Default=100}" />
+                                        Style="{x:StaticResource ButtonStyle}"
+                                        Text="Delete" />
                                     <Border Style="{x:StaticResource LabelStyle}">
                                         <Border.StrokeShape>
                                             <RoundRectangle CornerRadius="20,20,20,20" />
