@@ -70,6 +70,7 @@
                         HeightRequest="{OnIdiom Phone=240,
                                                 Default=320}"
                         HorizontalOptions="Center"
+                        MediaOpened="MediaElement_MediaOpened"
                         MetadataArtist="{Binding Show.PubDate}"
                         MetadataArtworkUrl="{Binding Show.Image}"
                         MetadataTitle="{Binding Show.Title}"

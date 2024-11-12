@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-	<PropertyGroup>
-		<NetVersion>net8.0</NetVersion>
-		<MauiPackageVersion>8.0.82</MauiPackageVersion>
-		<LangVersion>latest</LangVersion>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<NoWarn>NETSDK1023</NoWarn>
-		<ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-		<GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+  <PropertyGroup>
+    <NetVersion>net8.0</NetVersion>
+    <MauiPackageVersion>8.0.93</MauiPackageVersion>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>NETSDK1023</NoWarn>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+    <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 		<IsTrimmable>true</IsTrimmable>
 
-		<!-- WarningsAsErrors
+    <!-- https://learn.microsoft.com/dotnet/core/deploying/native-aot/?tabs=net8plus%2Cwindows -->
+    <StripSymbols>false</StripSymbols>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+
+    <!-- WarningsAsErrors
      CS0419: Ambiguous reference in cref attribute 
      CS1570: XML comment has badly formed XML 'Expected an end tag for element [parameter] 
      CS1571: XML comment on [construct] has a duplicate param tag for [parameter] 
@@ -35,16 +39,16 @@
      CS1711: XML comment has a typeparam tag, but there is no type parameter by that name 
      CS1712: Type parameter has no matching typeparam tag in the XML comment
      CS1723: XML comment has cref attribute that refers to a type parameter
-     CS1734: XML comment has a paramref tag, but there is no parameter by that name 
+     CS1734: XML comment has a paramref tag, but there is no parameter by that name
      xUnit1012: Null should not be used for type parameter
      xUnit2021: Assert.ThrowsAsync is async. The resulting task should be awaited -->
 		<WarningsAsErrors>nullable,CS0419,CS1570,CS1571,CS1572,CS1573,CS1574,CS1580,CS1581,CS1584,CS1587,CS1589,CS1590,CS1591,CS1592,CS1598,CS1658,CS1710,CS1711,CS1712,CS1723,CS1734,xUnit1012,xUnit2021</WarningsAsErrors>
-	</PropertyGroup>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<InternalsVisibleTo Include="CommunityToolkit.Maui.UnitTests" />
-	</ItemGroup>
-	<PropertyGroup Condition="'$(TF_BUILD)' == 'true' and $([MSBuild]::IsOSPlatform('windows')) == 'true'">
-		<IncludeTizenTargetFrameworks>true</IncludeTizenTargetFrameworks>
-	</PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="CommunityToolkit.Maui.UnitTests" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true' and $([MSBuild]::IsOSPlatform('windows')) == 'true'">
+    <IncludeTizenTargetFrameworks>true</IncludeTizenTargetFrameworks>
+  </PropertyGroup>
 </Project>

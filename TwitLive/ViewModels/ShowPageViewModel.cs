@@ -116,7 +116,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 				items[i].Status = temp.Status;
 			}
 		}
-		GetDispatcher.Dispatcher?.Dispatch(() => Shows = items);
+		Dispatcher?.Dispatch(() => Shows = items);
 	}
 
 	void QueDownload(Show show)
@@ -160,7 +160,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 		{
 			App.Download.shows.Remove(temp);
 		}
-		GetDispatcher.Dispatcher?.Dispatch(async () =>
+		Dispatcher?.Dispatch(async () =>
 		{
 			var toast = Toast.Make(toastText, duration, fontSize);
 			await toast.Show(CancellationToken.None).ConfigureAwait(false);
@@ -172,7 +172,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 			return;
 		}
 
-		GetDispatcher.Dispatcher?.Dispatch(() =>
+		Dispatcher?.Dispatch(() =>
 		{
 			PercentageLabel = string.Empty;
 			IsBusy = false;
@@ -183,7 +183,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 	{
 		if (App.Download?.shows.Count == 0)
 		{
-			GetDispatcher.Dispatcher?.Dispatch(() =>
+			Dispatcher?.Dispatch(() =>
 			{
 				PercentageLabel = string.Empty;
 				IsBusy = false;
@@ -194,7 +194,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 		if (show is not null)
 		{
 			logger.Info($"Updating show status: {show.Title} :Status: {m.Status}");
-			GetDispatcher.Dispatcher?.Dispatch(() => show.Status = m.Status);
+			Dispatcher?.Dispatch(() => show.Status = m.Status);
 		}
 
 		var downloads = await db.GetShowsAsync(CancellationToken.None).ConfigureAwait(false) ?? [];
@@ -211,7 +211,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 			if (temp is not null)
 			{
 				logger.Info($"Updating download status: {temp.Title} :Status: {item.Status}");
-				GetDispatcher.Dispatcher?.Dispatch(() => temp.Status = item.Status);
+				Dispatcher?.Dispatch(() => temp.Status = item.Status);
 			}
 		}
 	}

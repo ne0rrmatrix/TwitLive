@@ -1,4 +1,5 @@
 using System.Timers;
+using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Mvvm.Messaging;
 using MetroLog;
 using TwitLive.Interfaces;
@@ -15,7 +16,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	bool disposedValue;
 
 	Show? show;
-	IDb? item;
+	IDb? db;
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(VideoPlayerPage));
 	public VideoPlayerPage(VideoPlayerViewModel viewModel)
 	{
@@ -25,33 +26,24 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	}
 	void HandleMessage(NavigationMessage message)
 	{
-		if (message.Show is not null)
+		if (message.Value is true && message.Show is null && mediaElement is not null)
 		{
-			logger.Info("Did not navigate to video player. Not resetting videoplayer timer.");
-			return;
+			if(mediaElement.CurrentState == MediaElementState.Playing)
+			{
+				mediaElement.Pause();
+				logger.Info("Navigation event. Stopping Timer.");
+			}
+			StopTimer();
 		}
-		logger.Info("Resetting timer in video player");
-		StopTimer();
-		mediaElement.MediaOpened -= MediaElement_MediaOpened;
-		if (BindingContext is not VideoPlayerViewModel currentShow)
-		{
-			logger.Info("BindingContext is not VideoPlayerViewModel");
-			show = null;
-			item = null;
-			return;
-		}
-		logger.Info($"Navigated to video player with show: {currentShow.Show.Title}");
-		show = currentShow.Show;
-		item = currentShow.Db;
-		mediaElement.MediaOpened += MediaElement_MediaOpened;
 	}
-	
 	async void MediaElement_MediaOpened(object? sender, EventArgs e)
 	{
-		ArgumentNullException.ThrowIfNull(show);
-		ArgumentNullException.ThrowIfNull(item);
 		logger.Info("Media opened");
-		var result = await item.GetShowAsync(show).ConfigureAwait(true);
+		show = ((VideoPlayerViewModel)BindingContext).Show;
+		db = ((VideoPlayerViewModel)BindingContext).Db;
+		
+		StopTimer();
+		var result = await db.GetShowAsync(show).ConfigureAwait(true);
 		if (result is null)
 		{
 			StartTimer();
@@ -74,12 +66,15 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	
 	async void UpdatePlayedTime(object? sender, ElapsedEventArgs e)
 	{
-		ArgumentNullException.ThrowIfNull(show);
-		ArgumentNullException.ThrowIfNull(item);
+		if (show is null || db is null)
+		{
+			logger.Info("Show or db is null");
+			return;
+		}
 		if (!string.IsNullOrEmpty(show.Title))
 		{
 			show.Position = (int)mediaElement.Position.TotalSeconds;
-			await item.SaveShowAsync(show);
+			await db.SaveShowAsync(show);
 			logger.Info($"Show: {show.Title} at Position: {show.Position}");
 		}
 		else
@@ -95,7 +90,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 			timer.Stop();
 			timer.Dispose();
 		}
-		timer = new System.Timers.Timer(5000);
+		timer = new Timer(5000);
 		timer.Elapsed += UpdatePlayedTime;
 		timer.Start();
 	}

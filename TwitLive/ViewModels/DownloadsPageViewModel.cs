@@ -11,12 +11,12 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
 	List<Show> shows;
-	IDb db { get; set; }
+	readonly IDb db;
 	public DownloadsPageViewModel(IDb db)
 	{
 		this.db = db;
 		shows = []; 
-		GetDispatcher.Dispatcher?.Dispatch(async () => { await GetShows(CancellationToken.None).ConfigureAwait(false); OnPropertyChanged(nameof(Shows)); });
+		Dispatcher?.Dispatch(async () => { await GetShows(CancellationToken.None).ConfigureAwait(false); OnPropertyChanged(nameof(Shows)); });
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage());
 	}
 
@@ -24,7 +24,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	{
 		if (App.Download?.shows.Count == 0)
 		{
-			GetDispatcher.Dispatcher?.Dispatch(() =>
+			Dispatcher?.Dispatch(() =>
 			{
 				PercentageLabel = string.Empty;
 				IsBusy = false;
@@ -37,7 +37,15 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	async Task GetShows(CancellationToken cancellationToken = default)
 	{
 		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
-		GetDispatcher.Dispatcher?.Dispatch(() => Shows = downloads);
+		var temp = new List<Show>();
+		foreach (var download in downloads)
+		{
+			if (File.Exists(download.FileName))
+			{
+				temp.Add(download);
+			}
+		}
+		Dispatcher?.Dispatch(() => Shows = temp);
 		OnPropertyChanged(nameof(Shows));
 	}
 

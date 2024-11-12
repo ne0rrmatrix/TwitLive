@@ -14,6 +14,7 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 	readonly HttpClient? client;
 #pragma warning disable IDE0044
 	CancellationTokenSource cancellationToken;
+#pragma warning restore IDE0044
 	bool disposedValue;
 
 	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }

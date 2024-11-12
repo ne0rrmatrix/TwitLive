@@ -26,7 +26,7 @@ public partial class PodcastPageViewModel : BasePageViewModel
 	async Task LoadPodcasts(CancellationToken cancellationToken = default)
 	{
 		var item = await FeedService.GetPodcasts(cancellationToken).ConfigureAwait(false);
-		GetDispatcher.Dispatcher?.Dispatch(() => Podcasts = new ObservableCollection<Podcast>(item));
+		Dispatcher?.Dispatch(() => Podcasts = new ObservableCollection<Podcast>(item));
 	}
 
 	void HandleMessage(NavigationMessage message)
@@ -36,7 +36,7 @@ public partial class PodcastPageViewModel : BasePageViewModel
 		if (App.Download.shows.Count == 0 || !message.Value)
 		{
 			System.Diagnostics.Debug.WriteLine("Clearing Download Message");
-			GetDispatcher.Dispatcher?.Dispatch(() =>
+			Dispatcher?.Dispatch(() =>
 			{
 				PercentageLabel = string.Empty;
 				IsBusy = false;

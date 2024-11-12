@@ -39,7 +39,7 @@ public class Db : IDb
 
 	public async Task<Show> GetShowAsync(Show show, CancellationToken cancellationToken = default)
 	{
-		await Init(cancellationToken).ConfigureAwait(false);
+		await Init(cancellationToken);
 		if (db is null)
 		{
 			return new Show();
@@ -57,7 +57,7 @@ public class Db : IDb
 		var item = await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
 		if (item is not null)
 		{
-			await db.DeleteAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
+			await db.DeleteAsync(item).WaitAsync(cancellationToken).ConfigureAwait(false);
 			await db.InsertAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
 			return;
 		}
@@ -70,7 +70,7 @@ public class Db : IDb
 		{
 			return;
 		}
-		await Init(cancellationToken).ConfigureAwait(false);
+		await Init(cancellationToken);
 		if (db is null)
 		{
 			return;
@@ -87,7 +87,7 @@ public class Db : IDb
 
 	public async Task DeleteAllShows(CancellationToken cancellationToken = default)
 	{
-		await Init(cancellationToken).ConfigureAwait(false);
+		await Init(cancellationToken);
 		if (db is null)
 		{
 			return;

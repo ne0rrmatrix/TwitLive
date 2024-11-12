@@ -1,4 +1,3 @@
-using CommunityToolkit.Maui.Core;
 using TwitLive.ViewModels;
 
 namespace TwitLive.Views;
