@@ -31,9 +31,7 @@ public partial class PodcastPageViewModel : BasePageViewModel
 
 	void HandleMessage(NavigationMessage message)
 	{
-		ArgumentNullException.ThrowIfNull(App.Download);
-
-		if (App.Download.shows.Count == 0 || !message.Value)
+		if (App.Download?.shows.Count == 0 || !message.Value)
 		{
 			System.Diagnostics.Debug.WriteLine("Clearing Download Message");
 			Dispatcher?.Dispatch(() =>

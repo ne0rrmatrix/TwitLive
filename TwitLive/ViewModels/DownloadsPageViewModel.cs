@@ -16,7 +16,6 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	{
 		this.db = db;
 		shows = []; 
-		Dispatcher?.Dispatch(async () => { await GetShows(CancellationToken.None).ConfigureAwait(false); OnPropertyChanged(nameof(Shows)); });
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage());
 	}
 
@@ -30,23 +29,18 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 				IsBusy = false;
 			});
 		}
-		Shows.Clear();
 		await GetShows(CancellationToken.None).ConfigureAwait(false);
 	}
 
 	async Task GetShows(CancellationToken cancellationToken = default)
 	{
-		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
 		var temp = new List<Show>();
-		foreach (var download in downloads)
-		{
-			if (File.Exists(download.FileName))
-			{
-				temp.Add(download);
-			}
-		}
+		Shows.Clear();
+
+		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
+		temp.AddRange(downloads.Where(download => File.Exists(download.FileName) && download.Status == DownloadStatus.Downloaded));
+		
 		Dispatcher?.Dispatch(() => Shows = temp);
-		OnPropertyChanged(nameof(Shows));
 	}
 
 	[RelayCommand]
@@ -71,11 +65,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		{
 			File.Delete(show.FileName);
 		}
-		
-		var CurrentShows = await db.GetShowsAsync();
-		var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
-		await db.DeleteShowAsync(orphanedShow).ConfigureAwait(false);
-		Shows.Clear();
+		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, show));
 		await GetShows(CancellationToken.None).ConfigureAwait(false);
 	}
 

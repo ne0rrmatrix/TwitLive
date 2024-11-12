@@ -1,12 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using MetroLog;
 using TwitLive.Primitives;
 using TwitLive.Services;
 
 namespace TwitLive.ViewModels;
 public partial class BasePageViewModel : ObservableObject, IDisposable
 {
+	bool disposedValue;
 	[ObservableProperty]
 	double percentagBar;
 	[ObservableProperty]
@@ -20,12 +19,9 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 	bool isBusy;
 	public bool IsNotBusy => !IsBusy;
 	public DisplayInfo MyMainDisplay { get; set; }
-	
-	bool disposedValue;
 	readonly CancellationToken cancellationToken;
 	public CancellationToken CancellationToken => cancellationToken;
 	public readonly FeedService FeedService;
-	readonly ILogger logger = LoggerFactory.GetLogger(nameof(BasePageViewModel));
 	public BasePageViewModel()
 	{
 		ArgumentNullException.ThrowIfNull(App.Download);
@@ -37,9 +33,6 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 		DeviceDisplay.Current.MainDisplayInfoChanged += DeviceDisplayMainDisplayInfoChanged;
 		App.Download.ProgressChanged += Progress_ProgressChanged;
 	}
-
-	[RelayCommand]
-	public void SetIsBusy() => IsBusy = true;
 
 	public void DeviceDisplayMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
 	{
@@ -88,7 +81,6 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 
 	public void Progress_ProgressChanged(object? sender, DownloadProgressEventArgs e)
 	{
-		ArgumentNullException.ThrowIfNull(App.Download);
 		Dispatcher?.Dispatch(() =>
 		{
 			double temp = e.Percentage;

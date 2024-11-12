@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Web;
 using System.Windows.Input;
 using CommunityToolkit.Maui.Alerts;
@@ -16,7 +17,7 @@ namespace TwitLive.ViewModels;
 public partial class ShowPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
-	List<Show> shows;
+	ObservableCollection<Show> shows;
 
 	string url;
 	
@@ -43,7 +44,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 		url = string.Empty;
 		this.db = db;
 		shows = [];
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,(r, m) => ThreadPool.QueueUserWorkItem(async (state) => await HandleMessage(m)));
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,(r, m) => ThreadPool.QueueUserWorkItem(async (state) => await HandleMessage()));
 	}
 
 	[RelayCommand]
@@ -116,7 +117,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 				items[i].Status = temp.Status;
 			}
 		}
-		Dispatcher?.Dispatch(() => Shows = items);
+		Dispatcher?.Dispatch(() => Shows = new ObservableCollection<Show>(items));
 	}
 
 	void QueDownload(Show show)
@@ -179,7 +180,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 		});
 	}
 
-	async Task HandleMessage(NavigationMessage m)
+	async Task HandleMessage()
 	{
 		if (App.Download?.shows.Count == 0)
 		{
@@ -189,31 +190,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 				IsBusy = false;
 			});
 		}
-
-		var show = Shows.Find(x => x.Url == m.Show?.Url);
-		if (show is not null)
-		{
-			logger.Info($"Updating show status: {show.Title} :Status: {m.Status}");
-			Dispatcher?.Dispatch(() => show.Status = m.Status);
-		}
-
-		var downloads = await db.GetShowsAsync(CancellationToken.None).ConfigureAwait(false) ?? [];
-		if (Shows.Count == 0 || downloads.Count == 0)
-		{
-			logger.Info("Shows or Downloads is empty");
-			await LoadShows(CancellationToken.None).ConfigureAwait(false);
-			return;
-		}
-
-		foreach (var item in downloads)
-		{
-			var temp = Shows.Find(x => x.Url == item.Url);
-			if (temp is not null)
-			{
-				logger.Info($"Updating download status: {temp.Title} :Status: {item.Status}");
-				Dispatcher?.Dispatch(() => temp.Status = item.Status);
-			}
-		}
+		await LoadShows(CancellationToken.None).ConfigureAwait(false);
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>

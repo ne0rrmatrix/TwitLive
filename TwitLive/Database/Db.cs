@@ -23,7 +23,7 @@ public class Db : IDb
 		}
 		db = new SQLiteAsyncConnection(DbPath, Flags);
 		logger.Info("Database created");
-		await db.CreateTableAsync<Show>().WaitAsync(cancellationToken).ConfigureAwait(false);
+		await db.CreateTableAsync<Show>().WaitAsync(cancellationToken);
 		logger.Info("Table created");
 	}
 	
@@ -34,7 +34,7 @@ public class Db : IDb
 		{
 			return [];
 		}
-		return await db.Table<Show>().ToListAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		return await db.Table<Show>().ToListAsync().WaitAsync(cancellationToken);
 	}
 
 	public async Task<Show> GetShowAsync(Show show, CancellationToken cancellationToken = default)
@@ -44,7 +44,7 @@ public class Db : IDb
 		{
 			return new Show();
 		}
-		return await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		return await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken);
 	}
 
 	public async Task SaveShowAsync(Show show, CancellationToken cancellationToken = default)
@@ -54,14 +54,14 @@ public class Db : IDb
 		{
 			return;
 		}
-		var item = await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		var item = await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken);
 		if (item is not null)
 		{
-			await db.DeleteAsync(item).WaitAsync(cancellationToken).ConfigureAwait(false);
-			await db.InsertAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
+			await db.DeleteAsync(item).WaitAsync(cancellationToken);
+			await db.InsertAsync(show).WaitAsync(cancellationToken);
 			return;
 		}
-		await db.InsertAsync(show).WaitAsync(cancellationToken).ConfigureAwait(false);
+		await db.InsertAsync(show).WaitAsync(cancellationToken);
 	}
 
 	public async Task DeleteShowAsync(Show? show, CancellationToken cancellationToken = default)
@@ -75,13 +75,13 @@ public class Db : IDb
 		{
 			return;
 		}
-		var item = await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		var item = await db.Table<Show>().Where(i => i.Url == show.Url).FirstOrDefaultAsync().WaitAsync(cancellationToken);
 		if (item is null)
 		{
 			logger.Error("DB Entry not found!");
 			return;
 		}
-		await db.DeleteAsync(item).WaitAsync(cancellationToken).ConfigureAwait(false);
+		await db.DeleteAsync(item).WaitAsync(cancellationToken);
 		logger.Info($"DB Entry: {item.Title} Deleted!");
 	}
 
@@ -92,7 +92,7 @@ public class Db : IDb
 		{
 			return;
 		}
-		await db.DeleteAllAsync<Show>().WaitAsync(cancellationToken).ConfigureAwait(false);
+		await db.DeleteAllAsync<Show>().WaitAsync(cancellationToken);
 	}
 
 	public async Task SaveAllShowsAsync(List<Show> shows, CancellationToken cancellationToken = default)
@@ -102,6 +102,6 @@ public class Db : IDb
 		{
 			return;
 		}
-		await db.InsertAllAsync(shows).WaitAsync(cancellationToken).ConfigureAwait(false);
+		await db.InsertAllAsync(shows).WaitAsync(cancellationToken);
 	}
 }

@@ -26,7 +26,7 @@ public partial class VideoPlayerPage : ContentPage, IDisposable
 	}
 	void HandleMessage(NavigationMessage message)
 	{
-		if (message.Value is true && message.Show is null && mediaElement is not null)
+		if (message.Value && message.Show is null && mediaElement is not null)
 		{
 			if(mediaElement.CurrentState == MediaElementState.Playing)
 			{
