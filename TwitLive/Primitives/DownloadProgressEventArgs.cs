@@ -1,12 +1,7 @@
 ﻿namespace TwitLive.Primitives;
 
-public class DownloadProgressEventArgs : EventArgs
+public class DownloadProgressEventArgs(DownloadStatus status, double Percentage) : EventArgs
 {
-	public double Percentage { get; set; }
-	public DownloadStatus Status { get; }
-	public DownloadProgressEventArgs(DownloadStatus status, double Percentage)
-	{
-		this.Status = status;
-		this.Percentage = Percentage;
-	}
+	public double Percentage { get; set; } = Percentage;
+	public DownloadStatus Status { get; } = status;
 }

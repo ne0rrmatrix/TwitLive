@@ -15,8 +15,8 @@ public partial class Show : Shared, IDisposable
 		get => cancellationTokenSource;
 		set => SetProperty(ref cancellationTokenSource, value);
 	}
-	
-	int position;
+
+	int position = 0;
 	public int Position
 	{
 		get => position;
@@ -28,11 +28,11 @@ public partial class Show : Shared, IDisposable
 		get => fileName;
 		set => SetProperty(ref fileName, value);
 	}
-	int status;
+	DownloadStatus status = DownloadStatus.NotDownloaded;
 	public DownloadStatus Status
 	{
-		get => (DownloadStatus)Enum.ToObject(typeof(DownloadStatus), status);
-		set => SetProperty(ref status, (int)value);
+		get => status;
+		set => SetProperty(ref status, value);
 	}
 	protected virtual void Dispose(bool disposing)
 	{

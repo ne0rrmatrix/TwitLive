@@ -17,7 +17,8 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-    <MauiVersion>8.0.82</MauiVersion>
+    <MauiVersion>8.0.92</MauiVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     
 		<!-- Display name -->
 		<ApplicationTitle>Twit Podcasts</ApplicationTitle>
@@ -59,17 +60,17 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
-		<PackageReference Include="CommunityToolkit.Maui.Core" Version="9.0.3" />
-		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="4.1.0" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.1" />
+		<PackageReference Include="CommunityToolkit.Maui.Core" Version="9.1.1" />
+		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="4.2.0" />
+		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="4.1.2" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
 		<PackageReference Include="MetroLog.Maui" Version="2.1.0" />
     <PackageReference Include="FFImageLoading.Maui" Version="1.2.7" />
-		<PackageReference Include="System.Drawing.Common" Version="8.0.8" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.10" />
    <PackageReference Include="System.ServiceModel.Syndication" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.9" />  
 	</ItemGroup>

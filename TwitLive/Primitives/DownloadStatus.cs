@@ -1,7 +1,7 @@
 ﻿namespace TwitLive.Primitives;
 public enum DownloadStatus
 {
-	NotDownloaded,
-	Downloading,
-	Downloaded,
+	NotDownloaded = 0,
+	Downloading = 1,
+	Downloaded = 2,
 }

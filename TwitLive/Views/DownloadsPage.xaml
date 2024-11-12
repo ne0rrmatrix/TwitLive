@@ -70,7 +70,7 @@
                 ItemsSource="{Binding Shows}"
                 VerticalScrollBarVisibility="Never">
                 <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="{Binding Orientation}" />
+                    <GridItemsLayout Orientation="Vertical" Span="{Binding Span}" />
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
