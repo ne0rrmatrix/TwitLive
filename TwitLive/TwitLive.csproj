@@ -1,23 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
-		
-		<!-- Note for MacCatalyst:
-		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
-
+		<TargetFrameworks>$(NetVersion)-ios;$(NetVersion)-android;$(NetVersion)-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);$(NetVersion)-windows10.0.19041.0</TargetFrameworks>
 		<OutputType>Exe</OutputType>
 		<RootNamespace>TwitLive</RootNamespace>
 		<UseMaui>true</UseMaui>
+		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 		<SingleProject>true</SingleProject>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-    <MauiVersion>8.0.82</MauiVersion>
     
 		<!-- Display name -->
 		<ApplicationTitle>Twit Podcasts</ApplicationTitle>
@@ -25,19 +15,30 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.nerdnewsnavigator2.twitpodcasts</ApplicationId>
 
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1</ApplicationDisplayVersion>
-		<ApplicationVersion>4</ApplicationVersion>
+		<!--
+		Uncomment the line below if you need to debug the SG code
+		If you see any LongPath issue on Windows, check this doc
+		https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd#enable-long-paths-in-windows-10-version-1607-and-later
+		-->
+		<!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>-->
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-		<DefaultLanguage>En-US</DefaultLanguage>
-		<AndroidSigningKeyStore>TwitLive.keystore</AndroidSigningKeyStore>
+		
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+		<!-- Remove this NoWarn once XamlTypeInfo Generator (owned by .NET MAUI Engineering Team) implements a partial class-->
+		<NoWarn>CsWinRT1028</NoWarn>
+		
+		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
+		<WindowsPackageType>None</WindowsPackageType>
 	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' &#xD;&#xA;					AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'android'&#xD;&#xA;					AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'">
+		<!-- Ahead-of-time compilation is not yet supported net8.0-tizen -->
+		<!-- Cross-OS native compilation is not supported net8.0-android -->
+		<!-- Only iOS + MacCatalyst support AOT in .NET 9 -->
+		<PublishAot>true</PublishAot>
+  </PropertyGroup>
 	
 	<ItemGroup>
 		<!-- App Icon -->
@@ -58,28 +59,43 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 	
+	<PropertyGroup>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">26.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+	
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
-		<PackageReference Include="CommunityToolkit.Maui.Core" Version="9.0.3" />
-		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="4.1.0" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="*" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="11.0.0" />
+		<PackageReference Include="CommunityToolkit.Maui.Core" Version="11.0.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="MetroLog.Maui" Version="2.1.0" />
-    <PackageReference Include="FFImageLoading.Maui" Version="1.2.7" />
-		<PackageReference Include="System.Drawing.Common" Version="8.0.8" />
-   <PackageReference Include="System.ServiceModel.Syndication" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
-    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.9" />  
+		<PackageReference Include="System.ServiceModel.Syndication" Version="9.0.1" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
+		<PackageReference Include="SQLite.Net.Extensions" Version="3.0.0" />
+		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="6.0.0" />
+		<PackageReference Include="FFImageLoading.Maui" Version="1.2.7" />
+		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="4.2.0" />
+		<PackageReference Include="System.Drawing.Common" Version="9.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.1" />
 	</ItemGroup>
 
-	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='android'">
-		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
-		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='windows' and $(Configuration) == 'Release'">
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	</PropertyGroup>
-
-	<PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))=='false' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='maccatalyst' and $(Configuration) == 'Debug'">
+  
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))=='false' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='maccatalyst' and $(Configuration) == 'Debug'">
 		<RuntimeIdentifiers>maccatalyst-arm64;maccatalyst-x64</RuntimeIdentifiers>
 	</PropertyGroup>
+
+	<!-- Fixes Static Registrar causing Linker error: https://github.com/xamarin/xamarin-macios/blob/main/docs/managed-static-registrar.md -->
+	<Target Name="SelectStaticRegistrar" AfterTargets="SelectRegistrar">
+		<PropertyGroup Condition="'$(Registrar)' == 'managed-static'">
+			<Registrar>static</Registrar>
+		</PropertyGroup>
+	</Target>
 </Project>

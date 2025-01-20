@@ -3,20 +3,21 @@
 namespace TwitLive;
 public partial class App : Application
 {
+	readonly AppShell appShell;
 	public static IDownload? Download { get; private set; }
-	public App(IDownload download)
+	public App(IDownload download, AppShell appShell)
 	{
 		Download = download;
 		InitializeComponent();
-		MainPage = new AppShell();
+		this.appShell = appShell;
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		Window window = base.CreateWindow(activationState);
-		if(Download?.shows.Count > 0)
+		Window window =  new(appShell);
+		if (Download?.shows.Count > 0)
 		{
-			window.Destroying += (s,e) => Download?.shows[0]?.CancellationTokenSource.Cancel();
+			window.Destroying += (s, e) => Download?.shows[0]?.CancellationTokenSource.Cancel();
 		}
 		return window;
 	}

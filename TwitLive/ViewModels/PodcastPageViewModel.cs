@@ -12,10 +12,10 @@ namespace TwitLive.ViewModels;
 public partial class PodcastPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
-	ObservableCollection<Podcast> podcasts;
+	public partial ObservableCollection<Podcast> Podcasts { get; set; }
 	public PodcastPageViewModel()
 	{
-		podcasts = [];
+		Podcasts = [];
 		ThreadPool.QueueUserWorkItem(async (state) =>
 		{
 			await LoadPodcasts(CancellationToken.None);
@@ -26,17 +26,15 @@ public partial class PodcastPageViewModel : BasePageViewModel
 	async Task LoadPodcasts(CancellationToken cancellationToken = default)
 	{
 		var item = await FeedService.GetPodcasts(cancellationToken).ConfigureAwait(false);
-		GetDispatcher.Dispatcher?.Dispatch(() => Podcasts = new ObservableCollection<Podcast>(item));
+		Dispatcher?.Dispatch(() => Podcasts = new ObservableCollection<Podcast>(item));
 	}
 
 	void HandleMessage(NavigationMessage message)
 	{
-		ArgumentNullException.ThrowIfNull(App.Download);
-
-		if (App.Download.shows.Count == 0 || !message.Value)
+		if (App.Download?.shows.Count == 0 || !message.Value)
 		{
 			System.Diagnostics.Debug.WriteLine("Clearing Download Message");
-			GetDispatcher.Dispatcher?.Dispatch(() =>
+			Dispatcher?.Dispatch(() =>
 			{
 				PercentageLabel = string.Empty;
 				IsBusy = false;

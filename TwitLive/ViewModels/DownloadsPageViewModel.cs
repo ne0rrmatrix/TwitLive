@@ -10,13 +10,12 @@ namespace TwitLive.ViewModels;
 public partial class DownloadsPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
-	List<Show> shows;
-	IDb db { get; set; }
+	public partial List<Show> Shows { get; set; }
+	readonly IDb db;
 	public DownloadsPageViewModel(IDb db)
 	{
 		this.db = db;
-		shows = []; 
-		GetDispatcher.Dispatcher?.Dispatch(async () => { await GetShows(CancellationToken.None).ConfigureAwait(false); OnPropertyChanged(nameof(Shows)); });
+		Shows = []; 
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage());
 	}
 
@@ -24,21 +23,24 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 	{
 		if (App.Download?.shows.Count == 0)
 		{
-			GetDispatcher.Dispatcher?.Dispatch(() =>
+			Dispatcher?.Dispatch(() =>
 			{
 				PercentageLabel = string.Empty;
 				IsBusy = false;
 			});
 		}
-		Shows.Clear();
 		await GetShows(CancellationToken.None).ConfigureAwait(false);
 	}
 
 	async Task GetShows(CancellationToken cancellationToken = default)
 	{
+		var temp = new List<Show>();
+		Shows.Clear();
+
 		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
-		GetDispatcher.Dispatcher?.Dispatch(() => Shows = downloads);
-		OnPropertyChanged(nameof(Shows));
+		temp.AddRange(downloads.Where(download => File.Exists(download.FileName) && download.Status == DownloadStatus.Downloaded));
+		
+		Dispatcher?.Dispatch(() => Shows = temp);
 	}
 
 	[RelayCommand]
@@ -63,11 +65,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 		{
 			File.Delete(show.FileName);
 		}
-		
-		var CurrentShows = await db.GetShowsAsync();
-		var orphanedShow = CurrentShows.Find(x => x.Url == show.Url);
-		await db.DeleteShowAsync(orphanedShow).ConfigureAwait(false);
-		Shows.Clear();
+		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, show));
 		await GetShows(CancellationToken.None).ConfigureAwait(false);
 	}
 
