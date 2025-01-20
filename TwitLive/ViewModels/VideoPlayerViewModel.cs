@@ -6,27 +6,25 @@ using TwitLive.Models;
 using TwitLive.Primitives;
 
 namespace TwitLive.ViewModels;
-[QueryProperty("Show", "Show")]
-public partial class VideoPlayerViewModel : BasePageViewModel
+public partial class VideoPlayerViewModel : BasePageViewModel, IQueryAttributable
 {
-	Show show = new();
-	public Show Show
+	[ObservableProperty]
+	public partial Show Show { get; set; }
+	public void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
-		get => show;
-		set
+		if (query.TryGetValue("Show", out var showObj) && showObj is Show show)
 		{
-			SetProperty(ref show, value);
+			Show = show;
 		}
 	}
-	
-	readonly IDb db;
 
-	public IDb Db => db;
+	public IDb Db { get; }
 
 	public VideoPlayerViewModel(IDb db)
 	{
-		this.db = db;
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => ThreadPool.QueueUserWorkItem((state) => HandleMessage()));
+		Show = new();
+		this.Db = db;
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage());
 	}
 
 	void HandleMessage()

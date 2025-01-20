@@ -3,9 +3,6 @@
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:enableOnBackInvokedCallback="true" android:supportsRtl="true" android:label="Twit Podcasts">
 		<service android:name="CommunityToolkit.Maui.Services" android:exported="false" android:enabled="true" android:foregroundServiceType="mediaPlayback">
 			<intent-filter>
-				<action android:name="android.intent.action.MEDIA_BUTTON" />
-			</intent-filter>
-			<intent-filter>
 				<action android:name="androidx.media3.session.MediaSessionService" />
 			</intent-filter>
 		</service>
@@ -14,7 +11,6 @@
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 	<uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 	<!-- Samsung -->

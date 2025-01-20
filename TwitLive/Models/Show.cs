@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using SQLite;
 using TwitLive.Primitives;
 
 namespace TwitLive.Models;
@@ -15,25 +16,12 @@ public partial class Show : Shared, IDisposable
 		get => cancellationTokenSource;
 		set => SetProperty(ref cancellationTokenSource, value);
 	}
-
-	int position = 0;
-	public int Position
-	{
-		get => position;
-		set => SetProperty(ref position, value);
-	}
-	string fileName = string.Empty;
-	public string FileName
-	{
-		get => fileName;
-		set => SetProperty(ref fileName, value);
-	}
-	DownloadStatus status = DownloadStatus.NotDownloaded;
-	public DownloadStatus Status
-	{
-		get => status;
-		set => SetProperty(ref status, value);
-	}
+	[ObservableProperty]
+	public partial int Position { get; set; } = 0;
+	[ObservableProperty]
+	public partial string FileName { get; set; } = string.Empty;
+	[ObservableProperty]
+	public partial DownloadStatus Status { get;set; } = DownloadStatus.NotDownloaded;
 	protected virtual void Dispose(bool disposing)
 	{
 		if (!disposedValue)

@@ -7,18 +7,21 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 {
 	bool disposedValue;
 	[ObservableProperty]
-	double percentagBar;
+	public partial double PercentagBar { get; set; }
 	[ObservableProperty]
-	int span;
+	public partial int Span { get; set; }
 	[ObservableProperty]
-	string percentageLabel = string.Empty;
+	public partial string PercentageLabel { get; set; } = string.Empty;
 	[ObservableProperty]
-	bool isRefreshing;
+	public partial bool IsRefreshing { get; set; }
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsNotBusy))]
-	bool isBusy;
+	public partial bool IsBusy { get; set; }
 	public bool IsNotBusy => !IsBusy;
-	public DisplayInfo MyMainDisplay { get; set; }
+	
+	[ObservableProperty]
+	public partial DisplayInfo MyMainDisplay { get; set; }
+
 	readonly CancellationToken cancellationToken;
 	public CancellationToken CancellationToken => cancellationToken;
 	public readonly FeedService FeedService;

@@ -10,12 +10,12 @@ namespace TwitLive.ViewModels;
 public partial class DownloadsPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
-	List<Show> shows;
+	public partial List<Show> Shows { get; set; }
 	readonly IDb db;
 	public DownloadsPageViewModel(IDb db)
 	{
 		this.db = db;
-		shows = []; 
+		Shows = []; 
 		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage());
 	}
 

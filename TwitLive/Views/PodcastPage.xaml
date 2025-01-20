@@ -85,7 +85,9 @@
                                         WidthRequest="{OnIdiom Phone=300,
                                                                Default=340}">
                                         <ffimage:CachedImage.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}, Path=GotoShowPageCommand}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer
+                                                Command="{Binding GotoShowPageCommand, x:DataType=viewModel:PodcastPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}}"
+                                                CommandParameter="{Binding .}" />
                                         </ffimage:CachedImage.GestureRecognizers>
                                     </ffimage:CachedImage>
                                     <Border Style="{x:StaticResource LabelStyle}">

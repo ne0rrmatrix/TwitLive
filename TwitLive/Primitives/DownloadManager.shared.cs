@@ -8,9 +8,9 @@ namespace TwitLive.Primitives;
 public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 {
 	[ObservableProperty]
-	string percentageLabel = string.Empty;
+	public partial string PercentageLabel { get; set; } = string.Empty;
 	[ObservableProperty]
-	double percentage;
+	public partial double Percentage { get; set; }
 	readonly HttpClient? client;
 #pragma warning disable IDE0044
 	CancellationTokenSource cancellationToken;
@@ -19,20 +19,19 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 
 	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
 	protected virtual void OnProgressChanged(DownloadProgressEventArgs e) => ProgressChanged?.Invoke(this, e);
-	public List<Show> shows { get; set; }
-	public Show CurrentShow
-	{
-		get => currentShow;
-		set => SetProperty(ref currentShow, value);
-	}
-	Show currentShow;
+
+	[ObservableProperty]
+	public partial List<Show> shows { get; set; }
+
+	[ObservableProperty]
+	public partial Show CurrentShow { get; set; }
 	IDb db { get; set; }
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(DownloadManager));
 
 	public DownloadManager(IDb db)
 	{
 		shows = [];
-		currentShow = new();
+		CurrentShow = new();
 		this.db = db;
 		cancellationToken = new();
 		client ??= new HttpClient();
@@ -84,7 +83,6 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 			PercentageLabel = string.Empty;
 			this.shows.Remove(show);
 			logger.Info("Download complete");
-			currentShow = new();
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Downloaded, Percentage));
 			return DownloadStatus.Downloaded;
 		}

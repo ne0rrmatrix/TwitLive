@@ -12,10 +12,10 @@ namespace TwitLive.ViewModels;
 public partial class PodcastPageViewModel : BasePageViewModel
 {
 	[ObservableProperty]
-	ObservableCollection<Podcast> podcasts;
+	public partial ObservableCollection<Podcast> Podcasts { get; set; }
 	public PodcastPageViewModel()
 	{
-		podcasts = [];
+		Podcasts = [];
 		ThreadPool.QueueUserWorkItem(async (state) =>
 		{
 			await LoadPodcasts(CancellationToken.None);

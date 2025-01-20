@@ -4,7 +4,7 @@ using TwitLive.Interfaces;
 using TwitLive.Models;
 
 namespace TwitLive.Database;
-public class Db : IDb
+public partial class Db : IDb
 {
 	public static string DbPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MyData.db");
 	SQLiteAsyncConnection? db;

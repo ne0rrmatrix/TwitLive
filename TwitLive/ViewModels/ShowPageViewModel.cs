@@ -13,39 +13,27 @@ using TwitLive.Primitives;
 using TwitLive.Services;
 
 namespace TwitLive.ViewModels;
-[QueryProperty("Url", "Url")]
-public partial class ShowPageViewModel : BasePageViewModel
+public partial class ShowPageViewModel(IDb db) : BasePageViewModel, IQueryAttributable
 {
 	[ObservableProperty]
-	ObservableCollection<Show> shows;
+	public partial ObservableCollection<Show> Shows { get; set; } = [];
 
-	string url;
-	
-	public string Url
+	[ObservableProperty]
+	public partial string Url { get; set; } = string.Empty;
+
+	public async void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
-		get => url;
-		set
+		if (query.TryGetValue("Url", out var urlObj) && urlObj is string url && !string.IsNullOrEmpty(url))
 		{
-			var item = HttpUtility.UrlDecode(value);
-			SetProperty(ref url, item);
-			ThreadPool.QueueUserWorkItem(async (state) =>
-			{
-				await LoadShows(CancellationToken.None).ConfigureAwait(false);
-			});
+			var item = HttpUtility.UrlDecode(url);
+			Url = item;
+			await LoadShows(CancellationToken.None).ConfigureAwait(false);
+			WeakReferenceMessenger.Default.Register<NavigationMessage>(this, async (r, m) => await HandleMessage());
 		}
 	}
-	
 
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(ShowPageViewModel));
-	readonly IDb db;
-
-	public ShowPageViewModel(IDb db)
-	{
-		url = string.Empty;
-		this.db = db;
-		shows = [];
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,(r, m) => ThreadPool.QueueUserWorkItem(async (state) => await HandleMessage()));
-	}
+	readonly IDb db = db;
 
 	[RelayCommand]
 	public async Task Cancel(Show show)
@@ -85,7 +73,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 		}
 		var item = App.Download.shows.Find(x => x.Url == show.Url);
 		ArgumentNullException.ThrowIfNull(item);
-		QueDownload(item);
+		await QueDownload(item);
 	}
 
 	[RelayCommand]
@@ -117,19 +105,24 @@ public partial class ShowPageViewModel : BasePageViewModel
 				items[i].Status = temp.Status;
 			}
 		}
-		Dispatcher?.Dispatch(() => Shows = new ObservableCollection<Show>(items));
+		if(Dispatcher.IsDispatchRequired)
+		{
+			Dispatcher.Dispatch(() => Shows = new ObservableCollection<Show>(items));
+			return;
+		}
+		else
+		{
+			Shows = new ObservableCollection<Show>(items);
+		}
 	}
 
-	void QueDownload(Show show)
+	async Task QueDownload(Show show)
 	{
 		ArgumentNullException.ThrowIfNull(App.Download);
 		IsBusy = true;
 
-		ThreadPool.QueueUserWorkItem(async (state) =>
-		{
-			var result = await App.Download.DownloadAsync(show, show.CancellationTokenSource.Token).ConfigureAwait(false);
-			await HandleResult(result, show).ConfigureAwait(false);
-		});
+		var result = await App.Download.DownloadAsync(show, show.CancellationTokenSource.Token).ConfigureAwait(false);
+		await HandleResult(result, show).ConfigureAwait(false);
 	}
 
 	async Task HandleResult(DownloadStatus result, Show show)
@@ -169,7 +162,7 @@ public partial class ShowPageViewModel : BasePageViewModel
 
 		if (App.Download.shows.Count > 0)
 		{
-			QueDownload(App.Download.shows[0]);
+			await QueDownload(App.Download.shows[0]).ConfigureAwait(false);
 			return;
 		}
 
@@ -184,11 +177,19 @@ public partial class ShowPageViewModel : BasePageViewModel
 	{
 		if (App.Download?.shows.Count == 0)
 		{
-			Dispatcher?.Dispatch(() =>
+			if(Dispatcher.IsDispatchRequired)
+			{
+				Dispatcher.Dispatch(() =>
+				{
+					PercentageLabel = string.Empty;
+					IsBusy = false;
+				});
+			}
+			else
 			{
 				PercentageLabel = string.Empty;
 				IsBusy = false;
-			});
+			}
 		}
 		await LoadShows(CancellationToken.None).ConfigureAwait(false);
 	}
