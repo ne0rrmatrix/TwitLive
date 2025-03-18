@@ -15,6 +15,11 @@ public partial class App : Application
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
 		Window window =  new(appShell);
+
+		if (Download?.shows.Count > 0)
+		{
+			window.Destroying += (s, e) => Download?.shows[0]?.CancellationTokenSource.Cancel();
+		}
 		return window;
 	}
 }
