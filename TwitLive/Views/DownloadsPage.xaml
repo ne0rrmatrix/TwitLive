@@ -1,87 +1,118 @@
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using TwitLive.Interfaces;
-using TwitLive.Models;
-using TwitLive.Primitives;
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="TwitLive.Views.DownloadsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:TwitLive.Primitives"
+    xmlns:ffimage="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+    xmlns:model="clr-namespace:TwitLive.Models"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModel="clr-namespace:TwitLive.ViewModels"
+    xmlns:windows="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;assembly=Microsoft.Maui.Controls"
+    x:DataType="viewModel:DownloadsPageViewModel"
+    BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                      Light={StaticResource LightPageBackgroundColor}}"
+    Shell.BackgroundColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                            Light={StaticResource LightPageBackgroundColor}}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <toolkit:EnumToBoolConverter x:Key="DownloadConverter">
+                <toolkit:EnumToBoolConverter.TrueValues>
+                    <app:DownloadStatus>Downloaded</app:DownloadStatus>
+                    <app:DownloadStatus>NotDownloaded</app:DownloadStatus>
+                    <app:DownloadStatus>Downloading</app:DownloadStatus>
+                </toolkit:EnumToBoolConverter.TrueValues>
+            </toolkit:EnumToBoolConverter>
+            <toolkit:EnumToBoolConverter x:Key="StatusConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <RefreshView
+        windows:RefreshView.RefreshPullDirection="TopToBottom"
+        Command="{Binding PullToRefreshCommand}"
+        IsRefreshing="{Binding IsRefreshing}"
+        RefreshColor="{AppThemeBinding Dark={StaticResource DarkSectionBackgroundColor},
+                                       Light={StaticResource LightPageBackgroundColor}}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackLayout
+                Grid.Row="0"
+                Margin="10"
+                Padding="5,5,5,5"
+                IsVisible="{Binding IsBusy}"
+                WidthRequest="{OnIdiom Phone=200,
+                                       Default=410}">
+                <Label HorizontalOptions="Center" Text="Download Progress" />
+                <ProgressBar
+                    Progress="{Binding PercentagBar}"
+                    ProgressColor="{AppThemeBinding Dark={StaticResource LightPageBackgroundColor},
+                                                    Light={StaticResource DarkSectionBackgroundColor}}"
+                    ScaleX="2"
+                    ScaleY="3">
+                    <ProgressBar.Behaviors>
+                        <toolkit:ProgressBarAnimationBehavior Easing="{x:Static Easing.SpringIn}" />
+                    </ProgressBar.Behaviors>
+                </ProgressBar>
+                <Label
+                    Padding="5"
+                    HorizontalOptions="Center"
+                    Text="{Binding PercentageLabel}" />
+            </StackLayout>
+            <CollectionView
+                Grid.Row="1"
+                Margin="10"
+                HorizontalScrollBarVisibility="Never"
+                ItemsSource="{Binding Shows}"
+                VerticalScrollBarVisibility="Never">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="{Binding Span}" />
+                </CollectionView.ItemsLayout>
 
-namespace TwitLive.ViewModels;
-public partial class DownloadsPageViewModel : BasePageViewModel
-{
-	[ObservableProperty]
-	public partial List<Show> Shows { get; set; }
-	readonly IDb db;
-	public DownloadsPageViewModel(IDb db)
-	{
-		this.db = db;
-		Shows = []; 
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this,async (r, m) => await HandleMessage());
-	}
-
-	async Task HandleMessage()
-	{
-		if (App.Download?.shows.Count == 0)
-		{
-			Dispatcher?.Dispatch(() =>
-			{
-				PercentageLabel = string.Empty;
-				IsBusy = false;
-			});
-		}
-		await GetShows(CancellationToken.None).ConfigureAwait(false);
-	}
-
-	async Task GetShows(CancellationToken cancellationToken = default)
-	{
-		var temp = new List<Show>();
-		Shows.Clear();
-
-		var downloads = await db.GetShowsAsync(cancellationToken).ConfigureAwait(false);
-		temp.AddRange(downloads.Where(download => File.Exists(download.FileName) && download.Status == DownloadStatus.Downloaded));
-		
-		Dispatcher?.Dispatch(() => Shows = temp);
-	}
-
-	[RelayCommand]
-	public static async Task GotoVideoPage(Show show, CancellationToken cancellationToken = default)
-	{
-		if (File.Exists(show.FileName))
-		{
-			show.Url = show.FileName;
-		}
-		var navigationParameter = new Dictionary<string, object>
-		{
-			{ "Show", show }
-		};
-		await Shell.Current.GoToAsync($"//VideoPlayerPage", navigationParameter).WaitAsync(cancellationToken).ConfigureAwait(false);
-	}
-
-	[RelayCommand]
-	public async Task DeleteShow(Show show)
-	{
-		await db.DeleteShowAsync(show);
-		if(File.Exists(show.FileName))
-		{
-			File.Delete(show.FileName);
-		}
-		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, show));
-		Shows.Remove(show);
-	}
-
-	public ICommand PullToRefreshCommand => new Command(async () =>
-	{
-		Shows.Clear();
-		IsRefreshing = true;
-		IsBusy = true;
-		await GetShows(CancellationToken.None).ConfigureAwait(false);
-		IsBusy = false;
-		IsRefreshing = false;
-	});
-
-	protected override void Dispose(bool disposing)
-	{
-		WeakReferenceMessenger.Default.Unregister<NavigationMessage>(this);
-		base.Dispose(disposing);
-	}
-}
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Show">
+                        <Grid Padding="5">
+                            <Border Style="{x:StaticResource BorderStyle}">
+                                <VerticalStackLayout>
+                                    <Label Style="{StaticResource TitleLabel}" Text="{Binding Title}" />
+                                    <ffimage:CachedImage
+                                        Aspect="AspectFit"
+                                        HorizontalOptions="Center"
+                                        Source="{Binding Image}"
+                                        WidthRequest="{OnIdiom Phone=300,
+                                                               Default=340}">
+                                        <ffimage:CachedImage.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding GotoVideoPageCommand, x:DataType=viewModel:DownloadsPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}}" CommandParameter="{Binding .}" />
+                                        </ffimage:CachedImage.GestureRecognizers>
+                                    </ffimage:CachedImage>
+                                    <Button
+                                        BackgroundColor="Red"
+                                        Command="{Binding DeleteShowCommand, x:DataType=viewModel:DownloadsPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:DownloadsPageViewModel}}}"
+                                        CommandParameter="{Binding .}"
+                                        IsVisible="{Binding Status, Converter={StaticResource StatusConverter}, ConverterParameter={x:Static app:DownloadStatus.Downloaded}}"
+                                        SemanticProperties.Description="download a show."
+                                        Style="{x:StaticResource ButtonStyle}"
+                                        Text="Delete" />
+                                    <Border Style="{x:StaticResource LabelStyle}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="20,20,20,20" />
+                                        </Border.StrokeShape>
+                                        <Label
+                                            HeightRequest="1500"
+                                            Style="{StaticResource InfoLabel}"
+                                            Text="{Binding Description}"
+                                            TextType="Html" />
+                                    </Border>
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </RefreshView>
+</ContentPage>

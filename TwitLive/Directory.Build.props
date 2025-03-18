@@ -216,12 +216,6 @@
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
-  <ItemGroup>
-    <SupportedPlatform Include="Tizen" />
-    <InternalsVisibleTo Include="CommunityToolkit.Maui.UnitTests"/>
-    <InternalsVisibleTo Include="CommunityToolkit.Maui.Analyzers.UnitTests"/>
-  </ItemGroup>
-
   <PropertyGroup Condition="('$(TF_BUILD)' == 'true' OR '$(GITHUB_ACTIONS)' == 'true') and $([MSBuild]::IsOSPlatform('windows')) == 'true'">
     <IncludeTizenTargetFrameworks>true</IncludeTizenTargetFrameworks>
   </PropertyGroup>
