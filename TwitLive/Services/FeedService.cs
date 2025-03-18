@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
 using TwitLive.Models;
@@ -174,7 +174,7 @@ public partial class FeedService : IDisposable
 	/// </summary>
 	/// <param name="dateTime"> DateTime <see cref="string"/></param>
 	/// <returns><see cref="DateTime"/></returns>
-	static DateTime ConvertToDateTime(string dateTime) => DateTime.Parse(dateTime.Remove(25), new CultureInfo("en-US"));
+	static DateTime ConvertToDateTime(string dateTime) => DateTime.Parse(dateTime[..25], new CultureInfo("en-US"));
 
 	protected virtual void Dispose(bool disposing)
 	{

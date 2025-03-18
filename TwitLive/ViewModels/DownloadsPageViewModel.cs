@@ -66,7 +66,7 @@ public partial class DownloadsPageViewModel : BasePageViewModel
 			File.Delete(show.FileName);
 		}
 		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, show));
-		await GetShows(CancellationToken.None).ConfigureAwait(false);
+		Shows.Remove(show);
 	}
 
 	public ICommand PullToRefreshCommand => new Command(async () =>

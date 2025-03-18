@@ -53,7 +53,6 @@
             <com:Extension Category="windows.comServer">
                 <com:ComServer>
                     <com:ExeServer Executable="TwitLive\TwitLive.exe" DisplayName="$targetnametoken$" Arguments="----AppNotificationActivated:">
-                        <!-- Example path to executable: CommunityToolkit.Maui.Sample\CommunityToolkit.Maui.Sample.exe -->
                         <com:Class Id="DC569483-91F7-40E6-B7F4-D59AFB517FC9" />
                     </com:ExeServer>
                 </com:ComServer>

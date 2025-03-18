@@ -76,9 +76,7 @@
                         MetadataTitle="{Binding Show.Title}"
                         ShouldAutoPlay="True"
                         ShouldKeepScreenOn="True"
-                        Source="{Binding Show.Url}"
-                        WidthRequest="{OnIdiom Phone=320,
-                                               Default=640}" />
+                        Source="{Binding Show.Url}" />
                     <Border Style="{x:StaticResource LabelStyle}">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="20,20,20,20" />
