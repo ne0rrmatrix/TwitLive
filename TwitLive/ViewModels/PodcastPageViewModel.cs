@@ -26,7 +26,7 @@ public partial class PodcastPageViewModel : BasePageViewModel
 	async Task LoadPodcasts(CancellationToken cancellationToken = default)
 	{
 		var item = await FeedService.GetPodcasts(cancellationToken).ConfigureAwait(false);
-		Dispatcher?.Dispatch(() => Podcasts = new ObservableCollection<Podcast>(item));
+		Dispatcher?.Dispatch(() => Podcasts = [.. item]);
 	}
 
 	void HandleMessage(NavigationMessage message)
@@ -65,7 +65,7 @@ public partial class PodcastPageViewModel : BasePageViewModel
 		OnPropertyChanged(nameof(IsRefreshing));
 		var item = await FeedService.GetPodcasts(CancellationToken.None).ConfigureAwait(false);
 		
-		Podcasts = new ObservableCollection<Podcast>(item);
+		Podcasts = [.. item];
 		IsRefreshing = false;
 		OnPropertyChanged(nameof(IsRefreshing));
 	});

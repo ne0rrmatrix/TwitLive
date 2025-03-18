@@ -85,9 +85,7 @@
                                         WidthRequest="{OnIdiom Phone=300,
                                                                Default=340}">
                                         <ffimage:CachedImage.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding GotoShowPageCommand, x:DataType=viewModel:PodcastPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}}"
-                                                CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding GotoShowPageCommand, x:DataType=viewModel:PodcastPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:PodcastPageViewModel}}}" CommandParameter="{Binding .}" />
                                         </ffimage:CachedImage.GestureRecognizers>
                                     </ffimage:CachedImage>
                                     <Border Style="{x:StaticResource LabelStyle}">
@@ -106,7 +104,7 @@
                 </CollectionView.ItemTemplate>
                 <CollectionView.EmptyView>
                     <ContentView>
-                        <VerticalStackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                             <Label
                                 Padding="20"
                                 FontSize="Large"

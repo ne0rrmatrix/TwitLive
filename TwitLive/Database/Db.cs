@@ -6,7 +6,8 @@ using TwitLive.Models;
 namespace TwitLive.Database;
 public partial class Db : IDb
 {
-	public static string DbPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MyData.db");
+	public static readonly string SaveDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwitLive");
+	public static string DbPath => Path.Combine(SaveDirectory, "MyData.db");
 	SQLiteAsyncConnection? db;
 	public const SQLite.SQLiteOpenFlags Flags = SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.Create | SQLite.SQLiteOpenFlags.SharedCache;
 	readonly ILogger logger =  LoggerFactory.GetLogger(nameof(Db));
@@ -20,6 +21,10 @@ public partial class Db : IDb
 		if (db is not null)
 		{
 			return;
+		}
+		if (!File.Exists(DbPath))
+		{
+			Directory.CreateDirectory(SaveDirectory);
 		}
 		db = new SQLiteAsyncConnection(DbPath, Flags);
 		logger.Info("Database created");
