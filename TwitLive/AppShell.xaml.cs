@@ -29,7 +29,7 @@ public partial class AppShell : Shell
 		}
 		App.Download.StopDownloads = true;
 		await App.Download.CurrentShow.CancellationTokenSource.CancelAsync();
-		
+
 		foreach (var item in App.Download.shows)
 		{
 			await db.DeleteShowAsync(item, CancellationToken.None);

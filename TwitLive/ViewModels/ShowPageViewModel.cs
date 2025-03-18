@@ -57,7 +57,8 @@ public partial class ShowPageViewModel : BasePageViewModel, IQueryAttributable
 		else
 		{
 			logger.Info("Cancel Item is current show");
-			await show.CancellationTokenSource.CancelAsync().ConfigureAwait(false);
+			var item = App.Download.shows.FirstOrDefault(x => x.Url == show.Url) ?? throw new InvalidOperationException();
+			await item.CancellationTokenSource.CancelAsync().ConfigureAwait(false);
 			show.CancellationTokenSource = new();
 		}
 	}
