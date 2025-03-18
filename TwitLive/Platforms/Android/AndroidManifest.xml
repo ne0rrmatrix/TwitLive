@@ -1,26 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nerdnewsnavigator2.twitpodcasts" android:versionCode="4" android:versionName="1.0.4">
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:enableOnBackInvokedCallback="true" android:supportsRtl="true" android:label="Twit Podcasts">
-		<service android:name="CommunityToolkit.Maui.Services" android:exported="false" android:enabled="true" android:foregroundServiceType="mediaPlayback">
-			<intent-filter>
-				<action android:name="androidx.media3.session.MediaSessionService" />
-			</intent-filter>
-		</service>
 	</application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-	<uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
-	<!-- Samsung -->
-	<uses-permission android:name="com.sec.android.provider.badge.permission.READ" />
-	<uses-permission android:name="com.sec.android.provider.badge.permission.WRITE" />
-	<uses-permission android:name="android.permission.RECORD_AUDIO" />
-	<uses-permission android:name="android.permission.INTERNET" />
-	<queries>
-		<intent>
-			<action android:name="android.intent.action.TTS_SERVICE" />
-		</intent>
-	</queries>
 </manifest>
