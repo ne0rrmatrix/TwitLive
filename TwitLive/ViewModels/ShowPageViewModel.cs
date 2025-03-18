@@ -66,13 +66,11 @@ public partial class ShowPageViewModel : BasePageViewModel, IQueryAttributable
 	[RelayCommand]
 	public static void DownloadShow(Show show)
 	{
-		System.Diagnostics.Debug.WriteLine($"Downloading {show.Url}");
 		show.Status = DownloadStatus.Downloading;
 		App.Download?.shows.Add(show);
 		WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Downloading, show));
 		ArgumentNullException.ThrowIfNull(App.Download);
 		ThreadPool.QueueUserWorkItem(async (temp) => await App.Download.QueDownload(show).ConfigureAwait(false));
-		System.Diagnostics.Debug.WriteLine("Queued download");
 
 	}
 

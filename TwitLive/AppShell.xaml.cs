@@ -24,7 +24,6 @@ public partial class AppShell : Shell
 		base.OnDisappearing();
 		if(App.Download is null || App.Download.shows.Count == 0)
 		{
-			System.Diagnostics.Trace.TraceInformation("Download is null or shows is empty");
 			return;
 		}
 		App.Download.StopDownloads = true;
