@@ -72,7 +72,7 @@
                 ItemsSource="{Binding Shows}"
                 VerticalScrollBarVisibility="Never">
                 <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="{Binding Orientation}" />
+                    <GridItemsLayout Orientation="Vertical" Span="{Binding Span}" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Show">
@@ -90,12 +90,12 @@
                                         WidthRequest="{OnIdiom Phone=300,
                                                                Default=340}">
                                         <ffimage:CachedImage.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=GotoVideoPageCommand}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding GotoVideoPageCommand, x:DataType=viewModel:ShowPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}}" CommandParameter="{Binding .}" />
                                         </ffimage:CachedImage.GestureRecognizers>
                                     </ffimage:CachedImage>
                                     <Button
                                         BackgroundColor="Green"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=DownloadShowCommand}"
+                                        Command="{Binding DownloadShowCommand, x:DataType=viewModel:ShowPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}}"
                                         CommandParameter="{Binding .}"
                                         IsEnabled="True"
                                         IsVisible="{Binding Status, Converter={StaticResource StatusConverter}, ConverterParameter={x:Static app:DownloadStatus.NotDownloaded}}"
@@ -104,7 +104,7 @@
                                         Text="Download" />
                                     <Button
                                         BackgroundColor="#CD2026"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}, Path=CancelCommand}"
+                                        Command="{Binding CancelCommand, x:DataType=viewModel:ShowPageViewModel, Source={RelativeSource AncestorType={x:Type viewModel:ShowPageViewModel}}}"
                                         CommandParameter="{Binding .}"
                                         IsVisible="{Binding Status, Converter={StaticResource StatusConverter}, ConverterParameter={x:Static app:DownloadStatus.Downloading}}"
                                         SemanticProperties.Description="cancel a current download."
@@ -127,7 +127,7 @@
                 </CollectionView.ItemTemplate>
                 <CollectionView.EmptyView>
                     <ContentView>
-                        <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                        <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
                             <Label
                                 Padding="20"
                                 FontSize="Large"

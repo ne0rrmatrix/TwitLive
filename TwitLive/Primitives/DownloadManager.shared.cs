@@ -1,3 +1,5 @@
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using MetroLog;
@@ -5,41 +7,107 @@ using TwitLive.Interfaces;
 using TwitLive.Models;
 
 namespace TwitLive.Primitives;
-public partial class DownloadManager :ObservableObject, IDownload, IDisposable
+public partial class DownloadManager :ObservableObject, IDisposable, IDownload
 {
+	
 	[ObservableProperty]
-	string percentageLabel = string.Empty;
+	public partial string PercentageLabel { get; set; } = string.Empty;
 	[ObservableProperty]
-	double percentage;
+	public partial double Percentage { get; set; }
+	public bool StopDownloads { get; set; } = false;
 	readonly HttpClient? client;
 #pragma warning disable IDE0044
 	CancellationTokenSource cancellationToken;
+#pragma warning restore IDE0044
 	bool disposedValue;
 
 	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
 	protected virtual void OnProgressChanged(DownloadProgressEventArgs e) => ProgressChanged?.Invoke(this, e);
-	public List<Show> shows { get; set; }
-	public Show CurrentShow
-	{
-		get => currentShow;
-		set => SetProperty(ref currentShow, value);
-	}
-	Show currentShow;
+
+	[ObservableProperty]
+	public partial List<Show> shows { get; set; }
+
+	[ObservableProperty]
+	public partial Show CurrentShow { get; set; }
 	IDb db { get; set; }
 	readonly ILogger logger = LoggerFactory.GetLogger(nameof(DownloadManager));
 
 	public DownloadManager(IDb db)
 	{
 		shows = [];
-		currentShow = new();
+		CurrentShow = new();
 		this.db = db;
 		cancellationToken = new();
 		client ??= new HttpClient();
 	}
 
-	public async Task<DownloadStatus> DownloadAsync(Show show, CancellationToken token)
+	public async Task QueDownload(Show? show)
+	{
+		if (show is null)
+		{
+			return;
+		}
+		await db.SaveShowAsync(show, CancellationToken.None).ConfigureAwait(false);
+		if (shows.Count > 1)
+		{
+			return;
+		}
+		await DownloadAsync(show, show.CancellationTokenSource.Token).ConfigureAwait(false);
+	}
+
+	void HandleResult(DownloadStatus result, Show show)
+	{
+		ArgumentNullException.ThrowIfNull(App.Download);
+		string toastText = string.Empty;
+		double fontSize = 14;
+		ToastDuration duration = ToastDuration.Short;
+		Application.Current?.Dispatcher?.Dispatch(async () =>
+		{
+			switch (result)
+			{
+				case DownloadStatus.Downloaded:
+					show.Status = DownloadStatus.Downloaded;
+					await db.SaveShowAsync(show, CancellationToken.None).ConfigureAwait(false);
+					WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.Downloaded, show));
+					toastText = "Download Complete";
+					break;
+				case DownloadStatus.NotDownloaded:
+					FileService.DeleteFile(show.FileName);
+					show.CancellationTokenSource = new();
+					show.Status = DownloadStatus.NotDownloaded;
+					await db.DeleteShowAsync(show, CancellationToken.None).ConfigureAwait(false);
+					WeakReferenceMessenger.Default.Send(new NavigationMessage(true, DownloadStatus.NotDownloaded, show));
+					toastText = "Download Cancelled";
+					break;
+			}
+		});
+		
+		Percentage = 0;
+		CurrentShow = new();
+		PercentageLabel = string.Empty;
+		this.shows.Remove(show);
+		Application.Current?.Dispatcher.Dispatch(async () =>
+		{
+			var toast = Toast.Make(toastText, duration, fontSize);
+			await toast.Show(CancellationToken.None).ConfigureAwait(false);
+		});
+
+		if (shows.Count > 0 && !StopDownloads)
+		{
+			ThreadPool.QueueUserWorkItem(async (state) => await DownloadAsync(shows[0], CancellationToken.None).ConfigureAwait(false));
+			return;
+		}
+
+		Application.Current?.Dispatcher.Dispatch(() =>
+		{
+			PercentageLabel = string.Empty;
+		});
+	}
+
+	public async Task DownloadAsync(Show show, CancellationToken token)
 	{
 		var file = FileService.GetFileName(show.Url);
+	
 		ArgumentNullException.ThrowIfNull(file);
 		ArgumentNullException.ThrowIfNull(client);
 		try
@@ -78,23 +146,15 @@ public partial class DownloadManager :ObservableObject, IDownload, IDisposable
 			} while (isMoreToRead);
 
 			output.Close();
-			Percentage = 0;
-			CurrentShow = new();
-			PercentageLabel = string.Empty;
-			this.shows.Remove(show);
+			
 			logger.Info("Download complete");
-			currentShow = new();
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.Downloaded, Percentage));
-			return DownloadStatus.Downloaded;
+			HandleResult(DownloadStatus.Downloaded, show);
 		}
 		catch
 		{
-			Percentage = 0;
-			PercentageLabel = string.Empty;
-			CurrentShow = new();
-			this.shows.Remove(show);
 			OnProgressChanged(new DownloadProgressEventArgs(DownloadStatus.NotDownloaded, 0));
-			return DownloadStatus.NotDownloaded;
+			HandleResult(DownloadStatus.NotDownloaded, show);
 		}
 	}
 
@@ -148,7 +208,7 @@ public static class FileService
 	public static string GetFileName(string url)
 	{
 		var temp = new Uri(url).LocalPath;
-		var filename = System.IO.Path.GetFileName(temp);
-		return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), filename);
+		var filename = Path.GetFileName(temp);
+		return Path.Combine(TwitLive.Database.Db.SaveDirectory, filename);
 	}
 }

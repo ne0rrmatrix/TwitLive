@@ -1,24 +1,30 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using TwitLive.Interfaces;
 using TwitLive.Models;
 using TwitLive.Primitives;
 
 namespace TwitLive.ViewModels;
-[QueryProperty(nameof(Show), "Show")]
-public partial class VideoPlayerViewModel : BasePageViewModel
+public partial class VideoPlayerViewModel : BasePageViewModel, IQueryAttributable
 {
 	[ObservableProperty]
-	Show show;
+	public partial Show Show { get; set; }
+	public void ApplyQueryAttributes(IDictionary<string, object> query)
+	{
+		if (query.TryGetValue("Show", out var showObj) && showObj is Show show)
+		{
+			Show = show;
+		}
+	}
 
-	[ObservableProperty]
-	IDb db;
+	public IDb Db { get; }
 
 	public VideoPlayerViewModel(IDb db)
 	{
-		show ??= new();
-		this.db = db;
-		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => ThreadPool.QueueUserWorkItem((state) => HandleMessage()));
+		Show = new();
+		this.Db = db;
+		WeakReferenceMessenger.Default.Register<NavigationMessage>(this, (r, m) => HandleMessage());
 	}
 
 	void HandleMessage()
@@ -27,7 +33,7 @@ public partial class VideoPlayerViewModel : BasePageViewModel
 		{
 			return;
 		}
-		GetDispatcher.Dispatcher?.Dispatch(() =>
+		Dispatcher?.Dispatch(() =>
 		{
 			PercentageLabel = string.Empty;
 			IsBusy = false;

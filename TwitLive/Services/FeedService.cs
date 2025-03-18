@@ -9,7 +9,7 @@ namespace TwitLive.Services;
 /// <summary>
 /// A class that manages getting <see cref="Podcast"/> and <see cref="Show"/> from RSS feeds.
 /// </summary>
-public class FeedService : IDisposable
+public partial class FeedService : IDisposable
 {
 	readonly HttpClient httpClient;
 	bool disposedValue;
@@ -174,11 +174,7 @@ public class FeedService : IDisposable
 	/// </summary>
 	/// <param name="dateTime"> DateTime <see cref="string"/></param>
 	/// <returns><see cref="DateTime"/></returns>
-	static DateTime ConvertToDateTime(string dateTime)
-	{
-		return DateTime.Parse(dateTime.Remove(25), new CultureInfo("en-US"));
-
-	}
+	static DateTime ConvertToDateTime(string dateTime) => DateTime.Parse(dateTime[..25], new CultureInfo("en-US"));
 
 	protected virtual void Dispose(bool disposing)
 	{
@@ -191,10 +187,7 @@ public class FeedService : IDisposable
 			disposedValue = true;
 		}
 	}
-	 ~FeedService()
-	{
-	     Dispose(disposing: false);
-	}
+	 ~FeedService() => Dispose(disposing: false);
 
 	public void Dispose()
 	{

@@ -11,7 +11,7 @@
         <Tab
             Title="Home"
             Icon="home.png"
-            Route="Home">
+            Route="Podcasts">
             <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" />
         </Tab>
         <Tab
@@ -28,5 +28,4 @@
         </Tab>
     </TabBar>
 
-    <ShellContent ContentTemplate="{DataTemplate local:PodcastPage}" Route="MainPage" />
 </Shell>

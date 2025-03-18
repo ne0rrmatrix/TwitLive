@@ -4,9 +4,11 @@ using TwitLive.Primitives;
 namespace TwitLive.Interfaces;
 public interface IDownload
 {
-	public double Percentage { get; set; }
-	public List<Show> shows { get; set; }
-	public Show CurrentShow { get; set; }
-	public Task<DownloadStatus> DownloadAsync(Show show, CancellationToken token);
-	public EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
+	bool StopDownloads { get; set; }
+	double Percentage { get; set; }
+	List<Show> shows { get; set; }
+	Show CurrentShow { get; set; }
+	Task DownloadAsync(Show show, CancellationToken token);
+	Task QueDownload(Show? show);
+	EventHandler<DownloadProgressEventArgs>? ProgressChanged { get; set; }
 }

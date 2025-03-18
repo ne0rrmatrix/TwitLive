@@ -70,14 +70,13 @@
                         HeightRequest="{OnIdiom Phone=240,
                                                 Default=320}"
                         HorizontalOptions="Center"
+                        MediaOpened="MediaElement_MediaOpened"
                         MetadataArtist="{Binding Show.PubDate}"
                         MetadataArtworkUrl="{Binding Show.Image}"
                         MetadataTitle="{Binding Show.Title}"
                         ShouldAutoPlay="True"
                         ShouldKeepScreenOn="True"
-                        Source="{Binding Show.Url}"
-                        WidthRequest="{OnIdiom Phone=320,
-                                               Default=640}" />
+                        Source="{Binding Show.Url}" />
                     <Border Style="{x:StaticResource LabelStyle}">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="20,20,20,20" />

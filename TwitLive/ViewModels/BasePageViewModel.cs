@@ -1,79 +1,71 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using TwitLive.Primitives;
 using TwitLive.Services;
 
 namespace TwitLive.ViewModels;
 public partial class BasePageViewModel : ObservableObject, IDisposable
 {
+	bool disposedValue;
 	[ObservableProperty]
-	double percentagBar;
+	public partial double PercentagBar { get; set; }
 	[ObservableProperty]
-	int orientation;
+	public partial int Span { get; set; }
 	[ObservableProperty]
-	string percentageLabel = string.Empty;
+	public partial string PercentageLabel { get; set; } = string.Empty;
 	[ObservableProperty]
-	bool isRefreshing;
+	public partial bool IsRefreshing { get; set; }
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsNotBusy))]
-	bool isBusy;
+	public partial bool IsBusy { get; set; }
 	public bool IsNotBusy => !IsBusy;
-	public DisplayInfo MyMainDisplay { get; set; }
 	
-	bool disposedValue;
+	[ObservableProperty]
+	public partial DisplayInfo MyMainDisplay { get; set; }
+
 	readonly CancellationToken cancellationToken;
 	public CancellationToken CancellationToken => cancellationToken;
 	public readonly FeedService FeedService;
 	public BasePageViewModel()
 	{
+		ArgumentNullException.ThrowIfNull(App.Download);
 		cancellationToken = new();
 		MyMainDisplay = new();
 		FeedService = new FeedService();
-		Orientation = IdiomOrientation.Span;
-		OnPropertyChanged(nameof(Orientation));
-		ArgumentNullException.ThrowIfNull(App.Download);
+		Span = IdiomOrientation.Span;
+		OnPropertyChanged(nameof(Span));
 		DeviceDisplay.Current.MainDisplayInfoChanged += DeviceDisplayMainDisplayInfoChanged;
 		App.Download.ProgressChanged += Progress_ProgressChanged;
-	}
-
-	[RelayCommand]
-	public Task SetIsBusy()
-	{
-		System.Diagnostics.Trace.TraceInformation("BasePageViewModel");
-		IsBusy = false;
-		return Task.CompletedTask;
 	}
 
 	public void DeviceDisplayMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
 	{
 		MyMainDisplay = DeviceDisplay.Current.MainDisplayInfo;
 		OnPropertyChanged(nameof(MyMainDisplay));
-		Orientation = IdiomOrientation.Span;
-		OnPropertyChanged(nameof(Orientation));
+		Span = IdiomOrientation.Span;
+		OnPropertyChanged(nameof(Span));
 	}
 
-	public record struct GetDispatcher
-	{
-		public static IDispatcher Dispatcher => Application.Current?.Dispatcher ?? throw new FormatException("Dispatcher is not found.");
-	}
-
+	public static IDispatcher Dispatcher => Application.Current?.Dispatcher ?? throw new FormatException("Dispatcher is not found.");
 	public record struct IdiomOrientation
 	{
-		public static DeviceIdiom Idiom => DeviceInfo.Current.Idiom;
 		public static DisplayOrientation Orientation => DeviceDisplay.Current.MainDisplayInfo.Orientation;
+		public static DisplayInfo MainDisplayInfo => DeviceDisplay.Current.MainDisplayInfo;
+		public static DevicePlatform Platform => DeviceInfo.Current.Platform;
+		public static DeviceIdiom Idiom => DeviceInfo.Current.Idiom;
+
 		public static int Span
 		{
 			get
 			{
-				if ((int)DeviceDisplay.Current.MainDisplayInfo.Width <= 1920
-					&& (int)DeviceDisplay.Current.MainDisplayInfo.Width != 0
-					&& DeviceInfo.Current.Platform == DevicePlatform.WinUI)
+				if ((int)MainDisplayInfo.Width <= 1920
+					&& (int)MainDisplayInfo.Width != 0
+					&& Platform == DevicePlatform.WinUI)
 				{
 					return 2;
 				}
-				if((int)DeviceDisplay.Current.MainDisplayInfo.Width <= 1920
-					&& (int)DeviceDisplay.Current.MainDisplayInfo.Width != 0
-					&& DeviceInfo.Current.Platform == DevicePlatform.Android && DeviceInfo.Idiom != DeviceIdiom.Phone)
+				if((int)MainDisplayInfo.Width <= 1920
+					&& (int)MainDisplayInfo.Width != 0
+					&& Platform == DevicePlatform.Android && DeviceInfo.Idiom != DeviceIdiom.Phone)
 				{
 					return 2;
 				}
@@ -81,7 +73,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 				{
 					return Orientation == DisplayOrientation.Portrait ? 1 : 2;
 				}
-				if (Idiom == DeviceIdiom.Tablet || DeviceInfo.Current.Platform == DevicePlatform.iOS)
+				if (Idiom == DeviceIdiom.Tablet || Platform == DevicePlatform.iOS)
 				{
 					return Orientation == DisplayOrientation.Portrait ? 2 : 3;
 				}
@@ -92,8 +84,7 @@ public partial class BasePageViewModel : ObservableObject, IDisposable
 
 	public void Progress_ProgressChanged(object? sender, DownloadProgressEventArgs e)
 	{
-		ArgumentNullException.ThrowIfNull(App.Download);
-		GetDispatcher.Dispatcher?.Dispatch(() =>
+		Dispatcher?.Dispatch(() =>
 		{
 			double temp = e.Percentage;
 			PercentagBar = temp / 100;

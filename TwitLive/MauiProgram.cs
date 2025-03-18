@@ -12,11 +12,10 @@ using TwitLive.Views;
 using LoggerFactory = MetroLog.LoggerFactory;
 using LogLevel = MetroLog.LogLevel;
 
-#if WINDOWS
-using TwitLive.Handlers;
-#endif
+[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 
 namespace TwitLive;
+
 public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
@@ -36,17 +35,15 @@ public static class MauiProgram
 			fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 			fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
-		});
+		})
+			.ConfigureMauiHandlers(handlers =>
+			{
+#if IOS || MACCATALYST
+				handlers.AddHandler<CollectionView, Microsoft.Maui.Controls.Handlers.Items2.CollectionViewHandler2>();
+				handlers.AddHandler<CarouselView, Microsoft.Maui.Controls.Handlers.Items2.CarouselViewHandler2>();
+#endif
+			});
 
-		builder.ConfigureMauiHandlers(handlers =>
-		{
-#if WINDOWS
-            handlers.AddHandler<RefreshView, MauiRefreshViewHandler>();
-#endif
-#if ANDROID
-			handlers.AddHandler(typeof(Shell), typeof(TwitLive.Platforms.Android.CustomShellRenderer));
-#endif
-		});
 		#region Logging
 		var config = new LoggingConfiguration();
 
@@ -78,17 +75,12 @@ public static class MauiProgram
 
 		LoggerFactory.Initialize(config);
 		#endregion
-		builder.Services.AddSingleton<PodcastPage>();
-		builder.Services.AddSingleton<PodcastPageViewModel>();
+		builder.Services.AddSingleton<AppShell>();
 
-		builder.Services.AddSingleton<ShowPage>();
-		builder.Services.AddSingleton<ShowPageViewModel>();
-
-		builder.Services.AddTransient<VideoPlayerPage>();
-		builder.Services.AddSingleton<VideoPlayerViewModel>();
-
-		builder.Services.AddSingleton<DownloadsPage>();
-		builder.Services.AddSingleton<DownloadsPageViewModel>();
+		builder.Services.AddSingletonWithShellRoute<PodcastPage, PodcastPageViewModel>("//PodcastPage");
+		builder.Services.AddTransientWithShellRoute<ShowPage, ShowPageViewModel>("//ShowPage");
+		builder.Services.AddSingletonWithShellRoute<VideoPlayerPage, VideoPlayerViewModel>("//VideoPlayerPage");
+		builder.Services.AddSingletonWithShellRoute<DownloadsPage, DownloadsPageViewModel>("//DownloadsPage");
 
 		builder.Services.AddSingleton<BasePageViewModel>();
 		builder.Services.AddSingleton(LogOperatorRetriever.Instance);
